@@ -6,6 +6,8 @@ services:
     environment:
       POSTGRES_DB: listing-api
       POSTGRES_PASSWORD: password
+    ports:
+      - "5432"
     volumes:
       - 'postgres:/var/lib/postgresql/data'
   <% end -%>
@@ -15,8 +17,24 @@ services:
     environment:
       MYSQL_DATABASE: musolist
       MYSQL_ROOT_PASSWORD: password
+    ports:
+      - '3306'
     volumes:
       - 'mysql:/var/lib/mysql'
+  <% end -%>
+
+  <% if options[:solr] %>
+    solr:
+    image: solr:latest
+    ports:
+      - "8983"
+    volumes:
+      - 'solr:/opt/solr/server/solr/mycores'
+    entrypoint:
+      - docker-entrypoint.sh
+      - solr-precreate
+      - mycore
+    # docker-compose exec --user=solr solr bin/solr create_core -c CORENAME
   <% end -%>
 
   <% if options[:elasticsearchi] -%>
@@ -41,12 +59,16 @@ services:
 
   web:
     build: .
+    image: <%= project_name %>:latest
     command: bundle exec rails s -p 3000 -b '0.0.0.0'
     volumes:
       - .:/app
       - 'bundle:/bundle'
     ports:
       - "3000:3000"
+    environment:
+      - RAILS_ENV=development
+      - RACK_ENV=development
     links:
       <% if options[:postgres] -%>
       - postgres
@@ -60,8 +82,12 @@ services:
       <% if options[:elasticsearch] -%>
       - elasticsearch
       <% end -%>
+      <% if options[:solr] -%>
+      - solr
+      <% end -%>
 
 volumes:
+  bundle:
   <% if options[:postgres] -%>
   postgres:
   <% end -%>
@@ -74,4 +100,8 @@ volumes:
   <% if options[:elasticsearch] -%>
   elasticsearch:
   <% end -%>
+  <% if options[:solr] -%>
+  solr:
+  <% end -%>
+
 

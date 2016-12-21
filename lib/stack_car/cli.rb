@@ -37,7 +37,7 @@ module StackCar
       end
 
       db_libs = []
-      db_libs << "libpq-dev" if postgres
+      db_libs << "libpq-dev postgresql-client" if postgres
       db_libs << "mysql-client" if mysql
       db_libs = db_libs.join(' ')
 
