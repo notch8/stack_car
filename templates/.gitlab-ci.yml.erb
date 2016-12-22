@@ -1,0 +1,68 @@
+services:
+  - docker:dind
+  <% if options[:postgres] -%>
+  - postgres:latest
+  <% end -%>
+  <% if options[:mysql] -%>
+  - mysql:latest
+  <% end -%>
+  <% if options[:solr] -%>
+  - solr:latest
+  <% end -%>
+  <% if options[:elasticsearch] -%>
+  - elasticsearch:latest
+  <% end -%>
+  <% if options[:redis] -%>
+  - redis:latest
+  <% end -%>
+
+variables:
+  <% if options[:postgres] -%>
+  POSTGRES_DB: <%= project_name %>
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: DatabaseFTW
+  <% end -%>
+  <% if options[:MYSQL] -%>
+  MYSQL_DATABASE: <%= project_name %>
+  MYSQL_ROOT_PASSWORD: DatabaseFTW
+  <% end -%>
+
+
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  image: docker:latest
+  script:
+    - docker info
+    - docker login -u "gitlab-ci-token" -p "$CI_BUILD_TOKEN" $CI_REGISTRY
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME" .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME"
+
+test:
+  image: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
+  script:
+    - bundle install --path /cache
+    - bundle exec rake db:create db:migrate db:test:prepare RAILS_ENV=test
+    - bundle exec rake
+    - bundle exec rake assets:precompile
+
+staging:
+  image: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
+  type: deploy
+  script:
+    - gem install dpl multi_json
+    - # TODO DEPLOY COMMAND dpl --provider=heroku --app=east-west-payroll-staging --api-key=$HEROKU_STAGING_API_KEY
+  only:
+    - master
+
+production:
+  image: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
+  type: deploy
+  script:
+    - gem install dpl multi_json
+    - # TODO DEPLOY COMMAND dpl --provider=heroku --app=east-west-payroll --api-key=$HEROKU_PRODUCTION_API_KEY
+  when: manual
