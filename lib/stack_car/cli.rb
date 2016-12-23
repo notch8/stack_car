@@ -60,7 +60,7 @@ module StackCar
       db_libs = db_libs.join(' ')
 
       template_path = File.join(File.dirname(__FILE__), '..', '..', 'templates')
-      ['.dockerignore', 'Dockerfile', 'docker-compose.yml', 'docker-compose-prod.yml'].each do |template|
+      ['.dockerignore', 'Dockerfile', 'docker-compose.yml', 'docker-compose-prod.yml', '.gitlab-ci.yml', '.env'].each do |template|
 
         renderer = ERB.new(File.read(File.join(template_path, template + '.erb')), 0, '-')
         File.write(template, renderer.result(binding))
