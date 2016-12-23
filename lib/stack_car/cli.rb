@@ -3,9 +3,23 @@ require 'erb'
 module StackCar
   class HammerOfTheGods < Thor
     include Thor::Actions
-    desc "up", "starts docker-compose with rebuild and orphan removal"
+
+    method_option :service, default: 'web', type: :string, aliases: '-s'
+    desc "up", "starts docker-compose with rebuild and orphan removal, defaults to web"
     def up
-      %x{docker-compose up --build --remove-orphans}
+      run("docker-compose up #{options[:service]} --build --remove-orphans")
+    end
+
+    method_option :service, default: '', type: :string, aliases: '-s'
+    desc "stop", "starts docker-compose with rebuild and orphan removal, defaults to all"
+    def stop
+      run("docker-compose stop #{options[:service]}")
+    end
+
+    method_option :service, default: 'web', type: :string, aliases: '-s'
+    desc "run ARGS", "wraps docker-compose exec web unless --service is used to specify"
+    def run(args)
+      run("docker-compose run #{options[:service]} #{args}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
@@ -13,7 +27,7 @@ module StackCar
     def exec(args)
       run("docker-compose exec #{options[:service]} #{args}")
     end
-    map e: :exec
+    map ex: :exec
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "bundle_exec ARGS", "wraps docker-compose exec web bundle exec unless --service is used to specify"
@@ -28,12 +42,6 @@ module StackCar
       run("docker-compose exec #{options[:service]} bundle exec rails console #{args.join(' ')}")
     end
     map rc: :console
-
-    method_option :service, default: 'web', type: :string, aliases: '-s'
-    desc "restart", "shortcut to restart rails server"
-    def restart(*args)
-      run("docker-compose exec #{options[:service]} touch tmp/restart.txt")
-    end
 
     method_option :elasticsearch, default: false, type: :boolean, aliases: '-e'
     method_option :solr, default: false, type: :boolean, aliases: '-s'
