@@ -17,8 +17,8 @@ module StackCar
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
-    desc "run ARGS", "wraps docker-compose exec web unless --service is used to specify"
-    def run(args)
+    desc "walk ARGS", "wraps docker-compose run web unless --service is used to specify"
+    def walk(args)
       run("docker-compose run #{options[:service]} #{args}")
     end
 
