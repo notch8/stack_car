@@ -7,7 +7,7 @@ module StackCar
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "up", "starts docker-compose with rebuild and orphan removal, defaults to web"
     def up
-      run("docker-compose up #{options[:service]} --build --remove-orphans")
+      run("docker-compose up --build --remove-orphans #{options[:service]}")
     end
 
     method_option :service, default: '', type: :string, aliases: '-s'
