@@ -42,10 +42,11 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 Bug reports and pull requests are welcome on Gitlab at https://gitlab.com/notch8/stack_car.
 
 ## TODO
-Implement build
-Fill out readme
-Implement deploy
-Implement deploy templates
-Implement database dump and restore
-Implement secret sync
-Specs
+
+- Implement build
+- Fill out readme
+- Implement deploy
+- Implement deploy templates
+- Implement database dump and restore
+- Implement secret sync
+- Specs
