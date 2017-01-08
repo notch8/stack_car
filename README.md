@@ -1,5 +1,7 @@
 # StackCar
 
+![logo](logo.jpg)
+
 Stack Car is an opinionated set of tools around Docker and Rails.  It provides convenent methods to start and stop docker-compose, to deploy with rancher and a set of templates to get a new Rails app in to docker as quickly as possible.
 
 
