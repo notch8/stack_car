@@ -1,39 +1,33 @@
 # StackCar
 
-## TODO
-Implement UP
-Implement build
-Fill out readme
-Work on docs
-Implement deploy
-Implement deploy templates
-Implement database dump and restore
-Implement secret sync
-Convox live code reload?
+Stack Car is an opinionated set of tools around Docker and Rails.  It provides convenent methods to start and stop docker-compose, to deploy with rancher and a set of templates to get a new Rails app in to docker as quickly as possible.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/stack_car`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Because stack_car will be used to run your application in side of Docker, you want to install stack car in to your system Ruby instead of putting in your applications Gemfile
+u 
 
-```ruby
-gem 'stack_car'
+```bash
+gem install stack_car 
 ```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install stack_car
 
 ## Usage
 
-TODO: Write usage instructions here
+
+Commands are accesible via the "sc" short cut. Note: this will need to be in your command path in front of the spreadsheet command (sc), which is a fairly archaiac unix spreadsheet tool. We're guessing you don't edit a lot of spreadsheets in your terminal, but if you do, we also figure you can override your path order pretty easily.
+
+```ruby
+Commands:
+  stack_car bundle_exec ARGS  # wraps docker-compose exec web bundle exec unless --service is used to specify
+  stack_car console ARGS      # shortcut to start rails console
+  stack_car dockerize DIR     # Will copy the docker tempates in to your project, see options for supported dependencies
+  stack_car exec ARGS         # wraps docker-compose exec web unless --service is used to specify
+  stack_car help [COMMAND]    # Describe available commands or one specific command
+  stack_car stop              # starts docker-compose with rebuild and orphan removal, defaults to all
+  stack_car up                # starts docker-compose with rebuild and orphan removal, defaults to web
+  stack_car walk ARGS         # wraps docker-compose run web unless --service is used to specify
+```
 
 ## Development
 
@@ -43,8 +37,13 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/stack_car.
+Bug reports and pull requests are welcome on Gitlab at https://gitlab.com/notch8/stack_car.
 
 ## TODO
-pull down db dumps
-push up db dumps
+Implement build
+Fill out readme
+Implement deploy
+Implement deploy templates
+Implement database dump and restore
+Implement secret sync
+Specs
