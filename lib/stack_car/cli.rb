@@ -18,14 +18,14 @@ module StackCar
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "walk ARGS", "wraps docker-compose run web unless --service is used to specify"
-    def walk(args)
-      run("docker-compose run #{options[:service]} #{args}")
+    def walk(*args)
+      run("docker-compose run #{options[:service]} #{args.join(' ')}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "exec ARGS", "wraps docker-compose exec web unless --service is used to specify"
-    def exec(args)
-      run("docker-compose exec #{options[:service]} #{args}")
+    def exec(*args)
+      run("docker-compose exec #{options[:service]} #{args.join(' ')}")
     end
     map ex: :exec
 

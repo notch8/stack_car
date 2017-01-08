@@ -1,6 +1,6 @@
 FROM ruby:2.3.0
 
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs mysql-client pv libsasl2-dev
+RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs postgresql-client mysql-client pv libsasl2-dev
 
 ENV APP_HOME /app
 
@@ -13,6 +13,4 @@ ENV BUNDLE_GEMFILE=$APP_HOME/Gemfile \
 ADD Gemfile* $APP_HOME/
 RUN bundle install
 
-RUN npm install -g bower
-RUN rake bower:install
 
