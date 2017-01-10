@@ -48,6 +48,7 @@ module StackCar
     method_option :postgres, default: false, type: :boolean, aliases: '-p'
     method_option :mysql, default: false, type: :boolean, aliases: '-m'
     method_option :redis, default: false, type: :boolean, aliases: '-r'
+    method_option :fcrepo, default: false, type: :boolean, aliases: '-f'
     method_option :sidekiq, default: false, type: :boolean, aliases: '-sq' # TODO
     method_option :mongodb, default: false, type: :boolean, aliases: '-mg' # TODO
     desc 'dockerize DIR', 'Will copy the docker tempates in to your project, see options for supported dependencies'
@@ -65,6 +66,7 @@ module StackCar
       db_libs = []
       db_libs << "libpq-dev postgresql-client" if options[:postgres]
       db_libs << "mysql-client" if options[:mysql]
+      db_libs << "libc6-dev libreoffice imagemagick unzip" if options[:fcrepo]
       db_libs = db_libs.join(' ')
 
       template_path = File.join(File.dirname(__FILE__), '..', '..', 'templates')

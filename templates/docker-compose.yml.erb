@@ -51,6 +51,14 @@ services:
     volumes:
       - 'redis:/var/lib/redis/data'
 <% end -%>
+<% if options[:fcrepo] %>
+  fcrepo:
+    image: botimer/fcrepo:4.5.1
+    volumes:
+      - 'fcrepo:/opt/data'
+    ports:
+      - "8984:8080"
+<% end -%>
   web:
     build: .
     image: <%= project_name %>:latest
