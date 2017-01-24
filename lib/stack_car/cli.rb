@@ -61,12 +61,12 @@ module StackCar
 
     desc "provision ENVIRONMENT", "configure the servers for docker and then deploy an image"
     def provision(environment)
-      run("cd ops && ansible-playbook -i hosts #{environment} provision.yml")
+      run("cd ops && ansible-playbook -i hosts -l #{environment} provision.yml")
     end
 
     desc "deploy ENVIRONMENT", "deploy an image from the registry"
     def deploy(environment)
-      run("cd ops && ansible-playbook -i hosts #{environment} deploy.yml")
+      run("cd ops && ansible-playbook -i hosts -l #{environment} deploy.yml")
     end
 
     method_option :elasticsearch, default: false, type: :boolean, aliases: '-e'
