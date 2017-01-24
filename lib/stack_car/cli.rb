@@ -109,6 +109,7 @@ module StackCar
         ['hosts'].each do |template_file|
           template("#{template_file}.erb", "ops/#{template_file}")
         end
+        say 'Please update ops/hosts with the correct server addresses'
       end
     end
   end
