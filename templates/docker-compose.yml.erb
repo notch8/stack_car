@@ -61,7 +61,7 @@ services:
 <% end -%>
   web:
     build: .
-    image: <%= project_name %>:latest
+    image: <%= @project_name %>:latest
     command: bundle exec rails s -p 3000 -b '0.0.0.0'
     volumes:
       - .:/app

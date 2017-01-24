@@ -1,8 +1,14 @@
 require 'thor'
 require 'erb'
+require 'dotenv/load'
+
 module StackCar
   class HammerOfTheGods < Thor
     include Thor::Actions
+
+    def self.source_root
+      File.join(File.dirname(__FILE__), '..', '..', 'templates')
+    end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "up", "starts docker-compose with rebuild and orphan removal, defaults to web"
@@ -43,12 +49,34 @@ module StackCar
     end
     map rc: :console
 
+    desc "release ENVIRONTMENT", "tag and push and image to the registry"
+    def release(environment)
+      registry = "ENV['REGISTRY_HOST']ENV['REGISTRY_URI']"
+      run("docker login #{ENV['REGISTRY_HOST']}")
+      run("docker tag #{registry} #{registry}:#{environment}-#{Time.now.strftime("%Y%m%d%I%M%S")}")
+      run("docker push #{registry}:#{environment}-#{Time.now.strftime("%Y%m%d%I%M%S")}")
+      run("docker tag #{registry} #{registry}:#{environment}-latest")
+      run("docker push #{registry}:#{environment}-latest")
+    end
+
+    desc "provision ENVIRONMENT", "configure the servers for docker and then deploy an image"
+    def provision(environment)
+      run("cd ops && ansible-playbook -i hosts #{environment} provision.yml")
+    end
+
+    desc "deploy ENVIRONMENT", "deploy an image from the registry"
+    def deploy(environment)
+      run("cd ops && ansible-playbook -i hosts #{environment} deploy.yml")
+    end
+
     method_option :elasticsearch, default: false, type: :boolean, aliases: '-e'
     method_option :solr, default: false, type: :boolean, aliases: '-s'
     method_option :postgres, default: false, type: :boolean, aliases: '-p'
     method_option :mysql, default: false, type: :boolean, aliases: '-m'
     method_option :redis, default: false, type: :boolean, aliases: '-r'
     method_option :fcrepo, default: false, type: :boolean, aliases: '-f'
+    method_option :deploy, default: false, type: :boolean, aliases: '-d'
+    method_option :rancher, default: false, type: :boolean, aliases: '-dr'
     method_option :sidekiq, default: false, type: :boolean, aliases: '-sq' # TODO
     method_option :mongodb, default: false, type: :boolean, aliases: '-mg' # TODO
     desc 'dockerize DIR', 'Will copy the docker tempates in to your project, see options for supported dependencies'
@@ -61,21 +89,27 @@ module StackCar
     def dockerize(dir=nil)
       if dir
         Dir.chdir(dir)
+      else
+        dir = '.'
       end
-      project_name = File.basename(File.expand_path(dir))
-      db_libs = []
-      db_libs << "libpq-dev postgresql-client" if options[:postgres]
-      db_libs << "mysql-client" if options[:mysql]
-      db_libs << "libc6-dev libreoffice imagemagick unzip" if options[:fcrepo]
-      db_libs = db_libs.join(' ')
+     @project_name = File.basename(File.expand_path(dir))
+     @db_libs = []
+     @db_libs << "libpq-dev postgresql-client" if options[:postgres]
+     @db_libs << "mysql-client" if options[:mysql]
+     @db_libs << "libc6-dev libreoffice imagemagick unzip" if options[:fcrepo]
+     @db_libs = @db_libs.join(' ')
 
-      template_path = File.join(File.dirname(__FILE__), '..', '..', 'templates')
-      ['.dockerignore', 'Dockerfile', 'docker-compose.yml', 'docker-compose-prod.yml', '.gitlab-ci.yml', '.env'].each do |template|
 
-        renderer = ERB.new(File.read(File.join(template_path, template + '.erb')), 0, '-')
-        File.write(template, renderer.result(binding))
+      ['.dockerignore', 'Dockerfile', 'docker-compose.yml', 'docker-compose-prod.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
+        template("#{template_file}.erb", template_file)
+      end
+
+      if options[:deploy] || options[:rancher]
+        directory('ops')
+        ['hosts'].each do |template_file|
+          template("#{template_file}.erb", "ops/#{template_file}")
+        end
       end
     end
-
   end
 end

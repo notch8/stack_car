@@ -1,0 +1,20 @@
+[staging]
+XX.XXX.XXX.XXX ansible_user=centos
+
+[production]
+XX.XXX.XXX.XXX ansible_user=ubuntu
+
+[servers:children]
+staging
+production
+
+[servers:vars]
+registry_host=registry.gitlab.com
+compose_dir=/var/www
+project_name=<%= @project_name %>
+
+[staging:vars]
+tag=staging-latest
+
+[production:vars]
+tag=production-latest

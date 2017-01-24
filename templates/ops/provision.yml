@@ -1,0 +1,17 @@
+---
+- name: Set up Docker on host
+  hosts: all
+  become: true
+  roles:
+    - docker
+  tasks:
+    - name: Install Compose Module
+      pip: name=docker-compose
+    - name: Upload docker-compose files
+      synchronize: 
+        src: ../.env
+        dest: "{{ compose_dir }}/{{ project_name }}_env"
+
+ 
+
+- include: deploy.yml
