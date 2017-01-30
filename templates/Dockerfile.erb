@@ -17,11 +17,12 @@ ENV APP_HOME /app
 RUN mkdir $APP_HOME
 WORKDIR $APP_HOME
 
+COPY ./bundle /bundle
 ENV BUNDLE_GEMFILE=$APP_HOME/Gemfile \
   BUNDLE_JOBS=2 \
   BUNDLE_PATH=/bundle
 
 ADD Gemfile* $APP_HOME/
-RUN bundle install
+RUN bundle check || bundle install
 
 COPY . $APP_HOME

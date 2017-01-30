@@ -11,16 +11,30 @@ module StackCar
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
+    method_option :build, default: true, type: boolean, aliases: '-b'
     desc "up", "starts docker-compose with rebuild and orphan removal, defaults to web"
     def up
-      run("docker-compose up --build --remove-orphans #{options[:service]}")
+      args = ['--remove-orphans']
+      args << '--build' if options[:build]
+
+      run("docker-compose up #{args.join(' ')} #{options[:service]}")
     end
 
     method_option :service, default: '', type: :string, aliases: '-s'
     desc "stop", "starts docker-compose with rebuild and orphan removal, defaults to all"
     def stop
       run("docker-compose stop #{options[:service]}")
+      rum("rm -rf tmp/pids/*")
     end
+
+    method_option :service, default: 'web', type: :string, aliases: '-s'
+    desc "build", "build the services, defaults to web"
+    def build
+      @project_name = File.basename(File.expand_path(dir))
+      run("docker-compose build #{options[:service]}")
+      run("docker cp #{@project_name}_#{options[:service]}_1:/bundle .")
+    end
+
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "walk ARGS", "wraps docker-compose run web unless --service is used to specify"
@@ -51,7 +65,7 @@ module StackCar
 
     desc "release ENVIRONTMENT", "tag and push and image to the registry"
     def release(environment)
-      registry = "ENV['REGISTRY_HOST']ENV['REGISTRY_URI']"
+      registry = "#{ENV['REGISTRY_HOST']}#{ENV['REGISTRY_URI']}"
       run("docker login #{ENV['REGISTRY_HOST']}")
       run("docker tag #{registry} #{registry}:#{environment}-#{Time.now.strftime("%Y%m%d%I%M%S")}")
       run("docker push #{registry}:#{environment}-#{Time.now.strftime("%Y%m%d%I%M%S")}")
@@ -103,7 +117,7 @@ module StackCar
       ['.dockerignore', 'Dockerfile', 'docker-compose.yml', 'docker-compose-prod.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
         template("#{template_file}.erb", template_file)
       end
-
+      directory('bundle')
       if options[:deploy] || options[:rancher]
         directory('ops')
         ['hosts'].each do |template_file|
