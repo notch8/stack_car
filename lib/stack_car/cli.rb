@@ -16,7 +16,7 @@ module StackCar
     def up
       args = ['--remove-orphans']
       args << '--build' if options[:build]
-
+      run("rm -rf tmp/pids/server.pid")
       run("docker-compose up #{args.join(' ')} #{options[:service]}")
     end
 
@@ -24,13 +24,13 @@ module StackCar
     desc "stop", "starts docker-compose with rebuild and orphan removal, defaults to all"
     def stop
       run("docker-compose stop #{options[:service]}")
-      rum("rm -rf tmp/pids/*")
+      run("rm -rf tmp/pids/server.pid")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "build", "build the services, defaults to web"
     def build
-      @project_name = File.basename(File.expand_path(dir))
+      @project_name = File.basename(File.expand_path('.'))
       run("docker-compose build #{options[:service]}")
       run("docker cp #{@project_name}_#{options[:service]}_1:/bundle .")
     end
@@ -117,7 +117,7 @@ module StackCar
       ['.dockerignore', 'Dockerfile', 'docker-compose.yml', 'docker-compose-prod.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
         template("#{template_file}.erb", template_file)
       end
-      directory('bundle')
+      empty_directory('bundle')
       if options[:deploy] || options[:rancher]
         directory('ops')
         ['hosts'].each do |template_file|
