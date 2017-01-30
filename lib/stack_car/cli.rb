@@ -11,7 +11,7 @@ module StackCar
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
-    method_option :build, default: true, type: boolean, aliases: '-b'
+    method_option :build, default: true, type: :boolean, aliases: '-b'
     desc "up", "starts docker-compose with rebuild and orphan removal, defaults to web"
     def up
       args = ['--remove-orphans']
