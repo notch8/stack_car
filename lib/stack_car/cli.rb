@@ -120,8 +120,10 @@ module StackCar
      end
      template("database.yml.erb", "config/database.yml.erb")
      empty_directory('bundle')
-     insert_into_file ".gitignore", "bundle"
 
+     prepend_to_file "README.md" do
+       File.read('templates/README.md')
+     end
 
       if options[:deploy] || options[:rancher]
         directory('ops')
