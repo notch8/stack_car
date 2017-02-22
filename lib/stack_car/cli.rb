@@ -18,7 +18,7 @@ module StackCar
       args << '--build' if options[:build]
       run("rm -rf tmp/pids/server.pid")
       run("docker-compose up #{args.join(' ')} #{options[:service]}")
-      run("docker cp #{@project_name}_#{options[:service]}_1:/bundle .")
+# TODO      run("docker cp #{@project_name}_#{options[:service]}_1:/bundle .")
     end
 
     method_option :service, default: '', type: :string, aliases: '-s'
