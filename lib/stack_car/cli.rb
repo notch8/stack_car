@@ -18,6 +18,7 @@ module StackCar
       args << '--build' if options[:build]
       run("rm -rf tmp/pids/server.pid")
       run("docker-compose up #{args.join(' ')} #{options[:service]}")
+      run("docker cp #{@project_name}_#{options[:service]}_1:/bundle .")
     end
 
     method_option :service, default: '', type: :string, aliases: '-s'
@@ -32,7 +33,6 @@ module StackCar
     def build
       @project_name = File.basename(File.expand_path('.'))
       run("docker-compose build #{options[:service]}")
-      run("docker cp #{@project_name}_#{options[:service]}_1:/bundle .")
     end
 
 
@@ -118,11 +118,13 @@ module StackCar
        puts template_file
         template("#{template_file}.erb", template_file)
      end
-     template("database.yml.erb", "config/database.yml.erb")
+     template("database.yml.erb", "config/database.yml")
      empty_directory('bundle')
+     run("touch bundle/.gitkeep && git add bundle/.gitkeep") unless File.exists?('bundle/.gitkeep')
+     insert_into_file "config/environment.rb", "/bundle", :after => "/.bundle"
 
      prepend_to_file "README.md" do
-       File.read('templates/README.md')
+       File.read("#{self.class.source_root}/README.md")
      end
 
       if options[:deploy] || options[:rancher]

@@ -8,7 +8,7 @@ login: &login
 <% end -%>
 <% if options[:postgres] -%>
 login: &login
-  adapter: pg
+  adapter: postgresql
   host: <%%= ENV['POSTGRES_HOST'] %>
   username: <%%= ENV['POSTGRES_USER'] %>
   password: <%%= ENV['POSTGRES_PASSWORD'] %>
