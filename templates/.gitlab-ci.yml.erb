@@ -18,12 +18,12 @@ services:
 
 variables:
   <% if options[:postgres] -%>
-  POSTGRES_DB: <%= project_name %>
+  POSTGRES_DB: <%= @project_name %>
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: DatabaseFTW
   <% end -%>
   <% if options[:MYSQL] -%>
-  MYSQL_DATABASE: <%= project_name %>
+  MYSQL_DATABASE: <%= @project_name %>
   MYSQL_ROOT_PASSWORD: DatabaseFTW
   <% end -%>
 

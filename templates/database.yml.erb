@@ -1,0 +1,31 @@
+<% if options[:mysql] -%>
+login: &login
+  adapter: mysql2
+  host: <%%= ENV['MYSQL_HOST'] %>
+  username: <%%= ENV['MYSQL_USER'] %>
+  password: <%%= ENV['MYSQL_PASSWORD'] %>
+  database: <%%= ENV['MYSQL_DATABASE'] %>
+<% end -%>
+<% if options[:postgres] -%>
+login: &login
+  adapter: pg
+  host: <%%= ENV['POSTGRES_HOST'] %>
+  username: <%%= ENV['POSTGRES_USER'] %>
+  password: <%%= ENV['POSTGRES_PASSWORD'] %>
+  database: <%%= ENV['POSTGRES_DB'] %>
+<% end -%>
+
+
+development:
+  <<: *login
+
+test:
+  <<: *login
+  database: <%%= ENV['TEST_DB'] %>
+
+staging:
+  <<: *login
+
+
+production:
+  <<: *login

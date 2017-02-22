@@ -11,7 +11,7 @@ module StackCar
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
-    method_option :build, default: true, type: :boolean, aliases: '-b'
+    method_option :build, default: false, type: :boolean, aliases: '-b'
     desc "up", "starts docker-compose with rebuild and orphan removal, defaults to web"
     def up
       args = ['--remove-orphans']
@@ -114,10 +114,15 @@ module StackCar
      @db_libs = @db_libs.join(' ')
 
 
-      ['.dockerignore', 'Dockerfile', 'docker-compose.yml', 'docker-compose-prod.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
+     ['.dockerignore', 'Dockerfile', 'docker-compose.yml', 'docker-compose-prod.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
+       puts template_file
         template("#{template_file}.erb", template_file)
-      end
-      empty_directory('bundle')
+     end
+     template("database.yml.erb", "config/database.yml.erb")
+     empty_directory('bundle')
+     insert_into_file ".gitignore", "bundle"
+
+
       if options[:deploy] || options[:rancher]
         directory('ops')
         ['hosts'].each do |template_file|
