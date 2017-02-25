@@ -12,13 +12,19 @@ module StackCar
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     method_option :build, default: false, type: :boolean, aliases: '-b'
+    method_option :foreground, default: false, type: :boolean, aliases: '-f'
     desc "up", "starts docker-compose with rebuild and orphan removal, defaults to web"
     def up
       args = ['--remove-orphans']
       args << '--build' if options[:build]
+      args << '-d' if !options[:foreground]
       run("rm -rf tmp/pids/server.pid")
       run("docker-compose up #{args.join(' ')} #{options[:service]}")
-# TODO      run("docker cp #{@project_name}_#{options[:service]}_1:/bundle .")
+      if !options[:foreground]
+        say 'copying bundle to local, you can start using the app now.'
+        run("docker cp #{@project_name}_#{options[:service]}_1:/bundle .")
+        run("docker-compose logs --follow #{options[:service]}")
+      end
     end
 
     method_option :service, default: '', type: :string, aliases: '-s'
@@ -88,6 +94,7 @@ module StackCar
     method_option :postgres, default: false, type: :boolean, aliases: '-p'
     method_option :mysql, default: false, type: :boolean, aliases: '-m'
     method_option :redis, default: false, type: :boolean, aliases: '-r'
+    method_option :delayed_job, default: false, type: :boolean, aliases: '-dj'
     method_option :fcrepo, default: false, type: :boolean, aliases: '-f'
     method_option :deploy, default: false, type: :boolean, aliases: '-d'
     method_option :rancher, default: false, type: :boolean, aliases: '-dr'
@@ -100,18 +107,14 @@ module StackCar
 
     Pick your dependencies by using the command line arguments
     DOCKERIZE
-    def dockerize(dir=nil)
-      if dir
-        Dir.chdir(dir)
-      else
-        dir = '.'
-      end
-     @project_name = File.basename(File.expand_path(dir))
-     @db_libs = []
-     @db_libs << "libpq-dev postgresql-client" if options[:postgres]
-     @db_libs << "mysql-client" if options[:mysql]
-     @db_libs << "libc6-dev libreoffice imagemagick unzip" if options[:fcrepo]
-     @db_libs = @db_libs.join(' ')
+    def dockerize(dir=".")
+      Dir.chdir(dir)
+      @project_name = File.basename(File.expand_path(dir))
+      @db_libs = []
+      @db_libs << "libpq-dev postgresql-client" if options[:postgres]
+      @db_libs << "mysql-client" if options[:mysql]
+      @db_libs << "libc6-dev libreoffice imagemagick unzip" if options[:fcrepo]
+      @db_libs = @db_libs.join(' ')
 
 
      ['.dockerignore', 'Dockerfile', 'docker-compose.yml', 'docker-compose-prod.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
@@ -121,12 +124,16 @@ module StackCar
      template("database.yml.erb", "config/database.yml")
      empty_directory('bundle')
      run("touch bundle/.gitkeep && git add bundle/.gitkeep") unless File.exists?('bundle/.gitkeep')
-     insert_into_file "config/environment.rb", "/bundle", :after => "/.bundle"
-
-     prepend_to_file "README.md" do
-       File.read("#{self.class.source_root}/README.md")
+     insert_into_file ".gitignore", "/bundle", :after => "/.bundle"
+     if File.exists?('README.md')
+       prepend_to_file "README.md" do
+         File.read("#{self.class.source_root}/README.md")
+       end
+     else
+       create_file "README.md" do
+         File.read("#{self.class.source_root}/README.md")
+       end
      end
-
       if options[:deploy] || options[:rancher]
         directory('ops')
         ['hosts'].each do |template_file|
@@ -134,6 +141,18 @@ module StackCar
         end
         say 'Please update ops/hosts with the correct server addresses'
       end
+    end
+
+    protected
+    def compose_depends(*excludes)
+      @compose_depends = []
+      services = [:postgres, :mysql, :elasticsearch, :solr, :redis, :delayed_job] - excludes
+      services.each do |service|
+        if options[service]
+          @compose_depends << "      - #{service}"
+        end
+      end
+      return @compose_depends.join("\n")
     end
   end
 end
