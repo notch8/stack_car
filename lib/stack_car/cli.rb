@@ -21,12 +21,12 @@ module StackCar
       args << '-d' if !options[:foreground]
       run("rm -rf tmp/pids/server.pid")
       run("docker-compose up #{args.join(' ')} #{options[:service]}")
-      if !options[:foreground]
+      if options[:build]
         @project_name = File.basename(File.expand_path('.'))
         say 'copying bundle to local, you can start using the app now.'
         run("docker cp #{@project_name}_#{options[:service]}_1:/bundle .") if options[:build]
-        run("docker-compose logs --tail --follow #{options[:service]}") if options[:logs]
       end
+      run("docker-compose logs --tail 20 --follow ") if options[:logs]
     end
 
     method_option :service, default: '', type: :string, aliases: '-s'
