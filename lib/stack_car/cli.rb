@@ -13,6 +13,7 @@ module StackCar
     method_option :service, default: 'web', type: :string, aliases: '-s'
     method_option :build, default: false, type: :boolean, aliases: '-b'
     method_option :foreground, default: false, type: :boolean, aliases: '-f'
+    method_option :logs, default: true, type: :boolean
     desc "up", "starts docker-compose with rebuild and orphan removal, defaults to web"
     def up
       args = ['--remove-orphans']
@@ -21,9 +22,10 @@ module StackCar
       run("rm -rf tmp/pids/server.pid")
       run("docker-compose up #{args.join(' ')} #{options[:service]}")
       if !options[:foreground]
+        @project_name = File.basename(File.expand_path('.'))
         say 'copying bundle to local, you can start using the app now.'
-        run("docker cp #{@project_name}_#{options[:service]}_1:/bundle .")
-        run("docker-compose logs --follow #{options[:service]}")
+        run("docker cp #{@project_name}_#{options[:service]}_1:/bundle .") if options[:build]
+        run("docker-compose logs --tail --follow #{options[:service]}") if options[:logs]
       end
     end
 
@@ -33,14 +35,6 @@ module StackCar
       run("docker-compose stop #{options[:service]}")
       run("rm -rf tmp/pids/server.pid")
     end
-
-    method_option :service, default: 'web', type: :string, aliases: '-s'
-    desc "build", "build the services, defaults to web"
-    def build
-      @project_name = File.basename(File.expand_path('.'))
-      run("docker-compose build #{options[:service]}")
-    end
-
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "walk ARGS", "wraps docker-compose run web unless --service is used to specify"
