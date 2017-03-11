@@ -60,7 +60,6 @@ services:
       - "8080"
 <% end -%>
   main:
-    build: .
     image: "${REGISTRY_HOST}/${REGISTRY_URI}:${TAG}"
     volumes:
       - .:/app
@@ -83,6 +82,10 @@ services:
     extends:
       service: main
     command: bundle exec rails s -p 3000 -b '0.0.0.0'
+    labels:
+      rap.host: ${SITE_URI}
+      rap.le_host: ${SITE_URI}
+      rap.le_test: true
     ports:
       - "3000"
     depends_on:
@@ -104,3 +107,6 @@ volumes:
 <% if options[:redis] -%>
   redis:
 <% end -%>
+
+
+

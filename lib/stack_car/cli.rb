@@ -19,8 +19,12 @@ module StackCar
       args = ['--remove-orphans']
       args << '--build' if options[:build]
       args << '-d' if !options[:foreground]
-      run("rm -rf tmp/pids/server.pid")
+      if options[:build]
+        run("docker-compose pull #{options[:service]}")
+      end
+
       run("docker-compose up #{args.join(' ')} #{options[:service]}")
+
       if options[:build]
         @project_name = File.basename(File.expand_path('.'))
         say 'copying bundle to local, you can start using the app now.'
@@ -33,7 +37,34 @@ module StackCar
     desc "stop", "starts docker-compose with rebuild and orphan removal, defaults to all"
     def stop
       run("docker-compose stop #{options[:service]}")
-      run("rm -rf tmp/pids/server.pid")
+      run("rm -rf tmp/pids/*")
+    end
+
+    method_option :service, default: 'web', type: :string, aliases: '-s'
+    desc "push ARGS", "wraps docker-compose push web unless --service is used to specify"
+    def push(*args)
+      run("docker-compose pull #{options[:service]} #{args.join(' ')}")
+    end
+
+    method_option :service, default: 'web', type: :string, aliases: '-s'
+    desc "pull ARGS", "wraps docker-compose pull web unless --service is used to specify"
+    def pull(*args)
+      run("docker-compose pull #{options[:service]} #{args.join(' ')}")
+    end
+
+    method_option :service, default: 'web', type: :string, aliases: '-s'
+    desc "ps ARGS", "wraps docker-compose pull web unless --service is used to specify"
+    def ps(*args)
+      run("docker-compose ps #{options[:service]} #{args.join(' ')}")
+    end
+    map status: :ps
+
+    method_option :service, default: 'web', type: :string, aliases: '-s'
+    desc "bundle ARGS", "wraps docker-compose run web unless --service is used to specify"
+    def bundle(*args)
+      run("docker-compose exec #{options[:service]} bundle")
+      @project_name = File.basename(File.expand_path('.'))
+      run("docker cp #{@project_name}_#{options[:service]}_1:/bundle .")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
@@ -111,7 +142,7 @@ module StackCar
       @db_libs = @db_libs.join(' ')
 
 
-     ['.dockerignore', 'Dockerfile', 'docker-compose.yml', 'docker-compose-prod.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
+     ['.dockerignore', 'Dockerfile', 'docker-compose.yml', 'docker-compose-ci.yml', 'docker-compose-prod.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
        puts template_file
         template("#{template_file}.erb", template_file)
      end

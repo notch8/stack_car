@@ -1,6 +1,6 @@
-FROM ruby:2.3.0
+FROM phusion/passenger-ruby23:0.9.20
 
-RUN apt-get update -qq && apt-get install -y build-essential nodejs pv libsasl2-dev <%= @db_libs %> && \
+RUN apt-get update -qq && apt-get install -y build-essential nodejs npm pv libsasl2-dev <%= @db_libs %> && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

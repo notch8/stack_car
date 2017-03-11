@@ -1,11 +1,24 @@
 version: '2'
 services:
   web:
-    image: <%= @project_name %>:latest
-    command: bash -c "bundle exec rake assets:precompile db:migrate && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    image: "${REGISTRY_HOST}/${REGISTRY_URI}:${TAG}"
+    command: bash -c "bundle exec rake assets:precompile db:migrate && bundle exec passenger start -p 3000 -b '0.0.0.0'""
     environment:
       - RAILS_ENV=production
       - RACK_ENV=production
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3000"
+    labels:
+      rap.host: ${SITE_URI}
+      rap.le_host: ${SITE_URI}
+      rap.le_test: true
+    env_file:
+      .env
+
+<% if options[:rancher] -%>
+volumes:
+  uploads:
+    driver: rancher-nfs
+    external: true
+<% end -%>

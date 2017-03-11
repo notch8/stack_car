@@ -1,3 +1,4 @@
+image: docker:latest
 services:
   - docker:dind
   <% if options[:postgres] -%>
@@ -16,6 +17,13 @@ services:
   - redis:latest
   <% end -%>
 
+stages:
+  - build
+  - test
+  - review
+  - staging
+  - production
+
 variables:
   <% if options[:postgres] -%>
   POSTGRES_DB: <%= @project_name %>
@@ -26,43 +34,102 @@ variables:
   MYSQL_DATABASE: <%= @project_name %>
   MYSQL_ROOT_PASSWORD: DatabaseFTW
   <% end -%>
-
-
-stages:
-  - build
-  - test
-  - deploy
+  TEST_DB: <%= @project_name %>
+  DOCKER_DRIVER: overlay
 
 build:
   stage: build
-  image: docker:latest
   script:
-    - docker info
     - docker login -u "gitlab-ci-token" -p "$CI_BUILD_TOKEN" $CI_REGISTRY
-    - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME" .
-    - docker push "$CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME"
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_BUILD_REF_SLUG" .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_BUILD_REF_SLUG"
+  variables:
+    GIT_STRATEGY: fetch
+  tags:
+    - docker
 
 test:
-  image: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
+  stage: test
+  image: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_SLUG
   script:
-    - bundle install --path /cache
-    - bundle exec rake db:create db:migrate db:test:prepare RAILS_ENV=test
-    - bundle exec rake
-    - bundle exec rake assets:precompile
+    - cd /app && bundle exec rake db:create db:schema:load spec
+  tags:
+    - docker
+  variables:
+    GIT_STRATEGY: none
+
+review:
+  stage: review
+  image: docker:latest
+  type: deploy
+  environment:
+    name: $CI_BUILD_REF_SLUG
+    url: http://web.$CI_BUILD_REF_SLUG.staging.$SITE_URI
+    on_stop: stop_review
+  only:
+    - branches
+  except:
+    - master
+  script:
+    - wget https://github.com/rancher/cli/releases/download/v0.4.1/rancher-linux-amd64-v0.4.1.tar.gz
+    - tar zxfv rancher-linux-amd64-v0.4.1.tar.gz
+    - export RANCHER_ENVIRONMENT=staging
+    - export TAG=$CI_BUILD_REF_SLUG
+    - ./rancher-v0.4.1/rancher up -p -d -u -c -s $TAG -f docker-compose-ci.yml
+  variables:
+    GIT_STRATEGY: fetch
+  tags:
+    - docker
+    - mysql
+
+stop_review:
+  stage: review
+  script:
+    <% if options[:rancher] -%>
+    - wget https://github.com/rancher/cli/releases/download/v0.4.1/rancher-linux-amd64-v0.4.1.tar.gz
+    - tar zxfv rancher-linux-amd64-v0.4.1.tar.gz
+    - export RANCHER_ENVIRONMENT=staging
+    - ./rancher-v0.4.1/rancher rm $CI_BUILD_REF_SLUG
+    <% end %>
+  variables:
+    GIT_STRATEGY: none
+  when: manual
+  environment:
+    name: $CI_BUILD_REF_SLUG
+    action: stop
 
 staging:
-  image: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
+  stage: staging
   type: deploy
   script:
-    - gem install dpl multi_json
-    - # TODO DEPLOY COMMAND dpl --provider=heroku --app=east-west-payroll-staging --api-key=$HEROKU_STAGING_API_KEY
+    <% if options[:rancher] -%>
+    - wget https://github.com/rancher/cli/releases/download/v0.4.1/rancher-linux-amd64-v0.4.1.tar.gz
+    - tar zxfv rancher-linux-amd64-v0.4.1.tar.gz
+    - export RANCHER_ENVIRONMENT=staging
+    - export TAG=master
+    - ./rancher-v0.4.1/rancher up -p -d -u -c -f docker-compose-ci.yml --stack $CI_BUILD_REF_SLUG
+    <% end -%>
   only:
     - master
+  variables:
+    GIT_STRATEGY: fetch
+  tags:
+    - docker
 
 production:
-  image: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
+  stage: production
   type: deploy
   script:
-    - gem install dpl multi_json
-    - # TODO DEPLOY COMMAND dpl --provider=heroku --app=east-west-payroll --api-key=$HEROKU_PRODUCTION_API_KEY
+    <% if options[:rancher] -%>
+    - wget https://github.com/rancher/cli/releases/download/v0.4.1/rancher-linux-amd64-v0.4.1.tar.gz
+    - tar zxfv rancher-linux-amd64-v0.4.1.tar.gz
+    - export RANCHER_ENVIRONMENT=production
+    - ./rancher-v0.4.1/rancher up -p -d -u -c -f docker-compose-prod.yml
+    <% end -%>
   when: manual
+  only:
+    - master
+  variables:
+    GIT_STRATEGY: fetch
+  tags:
+    - docker
