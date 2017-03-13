@@ -43,7 +43,7 @@ module StackCar
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "push ARGS", "wraps docker-compose push web unless --service is used to specify"
     def push(*args)
-      run("docker-compose pull #{options[:service]} #{args.join(' ')}")
+      run("docker-compose push #{options[:service]} #{args.join(' ')}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
