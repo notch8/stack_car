@@ -3,7 +3,7 @@
   hosts: all
   become: true
   roles:
-    - docker
+    - docker.ubuntu
   tasks:
     - name: Install Compose Module
       pip: name=docker-compose
