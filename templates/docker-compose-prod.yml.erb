@@ -1,7 +1,7 @@
-version: '2'
+version: '2.1'
 services:
   web:
-    image: "${REGISTRY_HOST}/${REGISTRY_URI}:${TAG}"
+    image: "${REGISTRY_HOST}/${REGISTRY_URI}:${TAG:-master}"
     command: bash -c "bundle exec rake assets:precompile db:migrate && bundle exec passenger start -p 3000 -b '0.0.0.0'""
     environment:
       - RAILS_ENV=production

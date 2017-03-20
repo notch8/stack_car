@@ -52,7 +52,7 @@ module StackCar
       run("docker-compose pull #{options[:service]} #{args.join(' ')}")
     end
 
-    method_option :service, default: 'web', type: :string, aliases: '-s'
+    method_option :service, default: '', type: :string, aliases: '-s'
     desc "ps ARGS", "wraps docker-compose pull web unless --service is used to specify"
     def ps(*args)
       run("docker-compose ps #{options[:service]} #{args.join(' ')}")
@@ -124,7 +124,8 @@ module StackCar
     method_option :deploy, default: false, type: :boolean, aliases: '-d'
     method_option :rancher, default: false, type: :boolean, aliases: '-dr'
     method_option :sidekiq, default: false, type: :boolean, aliases: '-sq' # TODO
-    method_option :mongodb, default: false, type: :boolean, aliases: '-mg' # TODO
+    method_option :mongodb, default: false, type: :boolean, aliases: '-mg'
+    method_option :memcached, default: false, type: :boolean, aliases: '-mc'
     desc 'dockerize DIR', 'Will copy the docker tempates in to your project, see options for supported dependencies'
     long_desc <<-DOCKERIZE
 
@@ -171,7 +172,7 @@ module StackCar
     protected
     def compose_depends(*excludes)
       @compose_depends = []
-      services = [:postgres, :mysql, :elasticsearch, :solr, :redis, :delayed_job] - excludes
+      services = [:postgres, :mysql, :elasticsearch, :solr, :redis, :mongodb, :memcached, :delayed_job] - excludes
       services.each do |service|
         if options[service]
           @compose_depends << "      - #{service}"

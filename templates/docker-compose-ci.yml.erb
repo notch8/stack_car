@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 services:
 <% if options[:postgres] -%>
   postgres:
@@ -51,6 +51,20 @@ services:
     volumes:
       - 'redis:/var/lib/redis/data'
 <% end -%>
+<% if options[:mongodb] -%>
+  mongodb:
+    image: mongo:2.6.12
+    volumes:
+      - 'mongodb:/data/db'
+    ports:
+      - "27017"
+<% end -%>
+<% if options[:memcached] -%>
+  memcached:
+    image: memcached
+    ports:
+      - "11211"
+<% end -%>
 <% if options[:fcrepo] -%>
   fcrepo:
     image: botimer/fcrepo:4.5.1
@@ -60,7 +74,7 @@ services:
       - "8080"
 <% end -%>
   main:
-    image: "${REGISTRY_HOST}/${REGISTRY_URI}:${TAG}"
+    image: "${REGISTRY_HOST}/${REGISTRY_URI}:${TAG:-master}"
     volumes:
       - .:/app
     env_file:
@@ -107,6 +121,7 @@ volumes:
 <% if options[:redis] -%>
   redis:
 <% end -%>
-
-
+<% if options[:mongodb] -%>
+  mongodb:
+<% end -%>
 
