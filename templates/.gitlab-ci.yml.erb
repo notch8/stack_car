@@ -1,21 +1,21 @@
 image: docker:latest
 services:
   - docker:dind
-  <% if options[:postgres] -%>
+<% if options[:postgres] -%>
   - postgres:latest
-  <% end -%>
-  <% if options[:mysql] -%>
+<% end -%>
+<% if options[:mysql] -%>
   - mysql:latest
-  <% end -%>
-  <% if options[:solr] -%>
+<% end -%>
+<% if options[:solr] -%>
   - solr:latest
-  <% end -%>
-  <% if options[:elasticsearch] -%>
+<% end -%>
+<% if options[:elasticsearch] -%>
   - elasticsearch:latest
-  <% end -%>
-  <% if options[:redis] -%>
+<% end -%>
+<% if options[:redis] -%>
   - redis:latest
-  <% end -%>
+<% end -%>
 
 stages:
   - build
@@ -25,15 +25,15 @@ stages:
   - production
 
 variables:
-  <% if options[:postgres] -%>
+<% if options[:postgres] -%>
   POSTGRES_DB: <%= @project_name %>
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: DatabaseFTW
-  <% end -%>
-  <% if options[:MYSQL] -%>
+<% end -%>
+<% if options[:MYSQL] -%>
   MYSQL_DATABASE: <%= @project_name %>
   MYSQL_ROOT_PASSWORD: DatabaseFTW
-  <% end -%>
+<% end -%>
   TEST_DB: <%= @project_name %>
   DOCKER_DRIVER: overlay
 
@@ -85,12 +85,12 @@ review:
 stop_review:
   stage: review
   script:
-    <% if options[:rancher] -%>
+<% if options[:rancher] -%>
     - wget https://github.com/rancher/cli/releases/download/v0.4.1/rancher-linux-amd64-v0.4.1.tar.gz
     - tar zxfv rancher-linux-amd64-v0.4.1.tar.gz
     - export RANCHER_ENVIRONMENT=staging
     - ./rancher-v0.4.1/rancher rm $CI_BUILD_REF_SLUG
-    <% end %>
+<% end %>
   variables:
     GIT_STRATEGY: none
   when: manual
@@ -102,13 +102,13 @@ staging:
   stage: staging
   type: deploy
   script:
-    <% if options[:rancher] -%>
+<% if options[:rancher] -%>
     - wget https://github.com/rancher/cli/releases/download/v0.4.1/rancher-linux-amd64-v0.4.1.tar.gz
     - tar zxfv rancher-linux-amd64-v0.4.1.tar.gz
     - export RANCHER_ENVIRONMENT=staging
     - export TAG=master
     - ./rancher-v0.4.1/rancher up -p -d -u -c -f docker-compose-ci.yml --stack $CI_BUILD_REF_SLUG
-    <% end -%>
+<% end -%>
   only:
     - master
   variables:
@@ -120,12 +120,12 @@ production:
   stage: production
   type: deploy
   script:
-    <% if options[:rancher] -%>
+<% if options[:rancher] -%>
     - wget https://github.com/rancher/cli/releases/download/v0.4.1/rancher-linux-amd64-v0.4.1.tar.gz
     - tar zxfv rancher-linux-amd64-v0.4.1.tar.gz
     - export RANCHER_ENVIRONMENT=production
     - ./rancher-v0.4.1/rancher up -p -d -u -c -f docker-compose-prod.yml
-    <% end -%>
+<% end -%>
   when: manual
   only:
     - master

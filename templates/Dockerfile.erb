@@ -12,17 +12,30 @@ RUN mkdir -p /opt/fits && \
     chmod +x fits-0.8.5/fits.sh
 
 <% end -%>
-ENV APP_HOME /app
 
+RUN rm /etc/nginx/sites-enabled/default
+COPY ops/webapp.conf /etc/nginx/sites-enabled/webapp.conf
+COPY ops/env.conf /etc/nginx/main.d/env.conf
+
+ENV APP_HOME /home/app/webapp
 RUN mkdir $APP_HOME
 WORKDIR $APP_HOME
 
-COPY ./bundle /bundle
 ENV BUNDLE_GEMFILE=$APP_HOME/Gemfile \
-  BUNDLE_JOBS=2 \
-  BUNDLE_PATH=/bundle
+  BUNDLE_JOBS=2
 
 ADD Gemfile* $APP_HOME/
 RUN bundle check || bundle install
 
+<% if options[:delayed_job] %>
+RUN touch /var/log/worker.log && chmod 666 /var/log/worker.log
+RUN mkdir /etc/service/worker
+ADD ops/worker.sh /etc/service/worker/run
+<% end %>
+
 COPY . $APP_HOME
+RUN chown -R app $APP_HOME
+
+RUN rm -f /etc/service/nginx/down
+
+CMD ["/sbin/my_init"]

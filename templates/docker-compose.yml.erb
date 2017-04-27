@@ -73,11 +73,11 @@ services:
     ports:
       - "8080"
 <% end -%>
-  main:
+  web:
     build: .
     image: "${REGISTRY_HOST}/${REGISTRY_URI}:${TAG:-master}"
     volumes:
-      - .:/app
+      - .:/home/app/webapp
     env_file:
       - .env
     # Keep the stdin open, so we can attach to our app container's process
@@ -85,20 +85,8 @@ services:
     stdin_open: true
     # Enable sending signals (CTRL+C, CTRL+P + CTRL+Q) into the container:
     tty: true
-<% if options[:delayed_job] -%>
-  delayed_job:
-    extends:
-      service: main
-    command: ./bin/delayed_job run
-    depends_on:
-<%= compose_depends(:delayed_job) %>
-<% end -%>
-  web:
-    extends:
-      service: main
-    command: bundle exec rails s -p 3000 -b '0.0.0.0'
     ports:
-      - "3000"
+      - "80"
     depends_on:
 <%= compose_depends %>
 
