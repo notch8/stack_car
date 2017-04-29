@@ -103,11 +103,11 @@ staging:
   type: deploy
   script:
 <% if options[:rancher] -%>
-    - wget https://github.com/rancher/cli/releases/download/v0.4.1/rancher-linux-amd64-v0.4.1.tar.gz
-    - tar zxfv rancher-linux-amd64-v0.4.1.tar.gz
-    - export RANCHER_ENVIRONMENT=staging
-    - export TAG=master
-    - ./rancher-v0.4.1/rancher up -p -d -u -c -f docker-compose-ci.yml --stack $CI_BUILD_REF_SLUG
+    - ./ops/deploy-app
+<% end -%>
+<% if options[:heroku] -%>
+  - gem install dpl multi_json
+  - dpl --provider=heroku --app=<%= @project_name %>-staging --api-key=$HEROKU_STAGING_API_KEY --run="bundle exec rake db:migrate"
 <% end -%>
   only:
     - master
@@ -121,10 +121,11 @@ production:
   type: deploy
   script:
 <% if options[:rancher] -%>
-    - wget https://github.com/rancher/cli/releases/download/v0.4.1/rancher-linux-amd64-v0.4.1.tar.gz
-    - tar zxfv rancher-linux-amd64-v0.4.1.tar.gz
-    - export RANCHER_ENVIRONMENT=production
-    - ./rancher-v0.4.1/rancher up -p -d -u -c -f docker-compose-prod.yml
+    - ./ops/deploy-app
+<% end -%>
+<% if options[:heroku] -%>
+  - gem install dpl multi_json
+  - dpl --provider=heroku --app=<%= @project_name %> --api-key=$HEROKU_PRODUCTION_API_KEY --run="bundle exec rake db:migrate"
 <% end -%>
   when: manual
   only:

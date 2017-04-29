@@ -12,25 +12,16 @@ module StackCar
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     method_option :build, default: false, type: :boolean, aliases: '-b'
-    method_option :foreground, default: false, type: :boolean, aliases: '-f'
     method_option :logs, default: true, type: :boolean
     desc "up", "starts docker-compose with rebuild and orphan removal, defaults to web"
     def up
       args = ['--remove-orphans']
       args << '--build' if options[:build]
-      args << '-d' if !options[:foreground]
       if options[:build]
         run("docker-compose pull #{options[:service]}")
       end
 
       run("docker-compose up #{args.join(' ')} #{options[:service]}")
-
-      if options[:build]
-        @project_name = File.basename(File.expand_path('.'))
-        say 'copying bundle to local, you can start using the app now.'
-        run("docker cp #{@project_name}_#{options[:service]}_1:/bundle .") if options[:build]
-      end
-      run("docker-compose logs --tail 20 --follow ") if options[:logs]
     end
 
     method_option :service, default: '', type: :string, aliases: '-s'
@@ -63,8 +54,6 @@ module StackCar
     desc "bundle ARGS", "wraps docker-compose run web unless --service is used to specify"
     def bundle(*args)
       run("docker-compose exec #{options[:service]} bundle")
-      @project_name = File.basename(File.expand_path('.'))
-      run("docker cp #{@project_name}_#{options[:service]}_1:/bundle .")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
@@ -119,9 +108,10 @@ module StackCar
     method_option :postgres, default: false, type: :boolean, aliases: '-p'
     method_option :mysql, default: false, type: :boolean, aliases: '-m'
     method_option :redis, default: false, type: :boolean, aliases: '-r'
-    method_option :delayed_job, default: false, type: :boolean, aliases: '-dj'
+    method_option :delayed_job, default: false, type: :boolean, aliases: '-j'
     method_option :fcrepo, default: false, type: :boolean, aliases: '-f'
     method_option :deploy, default: false, type: :boolean, aliases: '-d'
+    method_option :heroku, default: false, type: :boolean, aliases: '-h'
     method_option :rancher, default: false, type: :boolean, aliases: '-dr'
     method_option :sidekiq, default: false, type: :boolean, aliases: '-sq' # TODO
     method_option :mongodb, default: false, type: :boolean, aliases: '-mg'
@@ -148,9 +138,6 @@ module StackCar
         template("#{template_file}.erb", template_file)
      end
      template("database.yml.erb", "config/database.yml")
-     empty_directory('bundle')
-     run("touch bundle/.gitkeep && git add bundle/.gitkeep") unless File.exists?('bundle/.gitkeep')
-     insert_into_file ".gitignore", "/bundle", :after => "/.bundle"
      if File.exists?('README.md')
        prepend_to_file "README.md" do
          File.read("#{self.class.source_root}/README.md")
@@ -166,6 +153,13 @@ module StackCar
           template("#{template_file}.erb", "ops/#{template_file}")
         end
         say 'Please update ops/hosts with the correct server addresses'
+      else
+        empty_directory('ops')
+      end
+
+      # Do this after we figure out whether to use an empty ops directory or a full one
+      ['env.conf', 'webapp.conf'].each do |template_file|
+        template("#{template_file}.erb", "ops/#{template_file}")
       end
     end
 
