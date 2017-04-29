@@ -1,1 +1,5 @@
-stack_car
+#!/usr/bin/env ruby
+
+require "stack_car"
+
+StackCar::HammerOfTheGods.start(ARGV)
