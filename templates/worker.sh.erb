@@ -3,14 +3,4 @@
 # `/sbin/setuser memcache` runs the given command as the user `memcache`.
 # If you omit that part, the command will be run as root.
 
-if [ -z $RAILS_ENV ]
-then
-    export RAILS_ENV=development
-fi
-
-if [ $RAILS_ENV == "production" ]
-then
-    exec /sbin/setuser app /bin/bash -l -c 'cd /home/app/webapp && bundle exec rake assets:precompile db:migrate && bundle exec whenever --update-crontab && ./bin/delayed_job run >>/var/log/worker.log 2>&1'
-else
-    exec /sbin/setuser app /bin/bash -l -c 'cd /home/app/webapp && ./bin/delayed_job run >>/var/log/worker.log 2>&1'
-fi
+exec /sbin/setuser app /bin/bash -l -c 'cd /home/app/webapp && ./bin/delayed_job run >>/var/log/worker.log 2>&1'

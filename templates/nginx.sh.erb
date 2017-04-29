@@ -7,12 +7,12 @@ if [[ ! -e /var/log/nginx/error.log ]]; then
         (sleep 1 && sv restart /etc/service/nginx-log-forwarder)
 fi
 
-if [ -z $RAILS_ENV ]
+if [ -z $PASSENGER_APP_ENV ]
 then
-    export RAILS_ENV=development
+    export PASSENGER_APP_ENV=development
 fi
 
-if [ $RAILS_ENV == "production" ]
+if [ $PASSENGER_APP_ENV == "production" ]
 then
     /sbin/setuser app /bin/bash -l -c 'cd /home/app/webapp && bundle exec rake assets:precompile db:migrate'
 fi
