@@ -4,7 +4,7 @@ services:
   postgres:
     image: postgres
     env_file:
-      - .env
+      - .env-example
     ports:
       - "5432"
 <% end -%>
@@ -12,7 +12,7 @@ services:
   mysql:
     image: mysql
     env_file:
-      - .env
+      - .env-example
     ports:
       - '3306'
 <% end -%>

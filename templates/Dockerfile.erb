@@ -36,6 +36,8 @@ ADD ops/worker.sh /etc/service/worker/run
 COPY . $APP_HOME
 RUN chown -R app $APP_HOME
 
+# Asset complie and migrate if prod, otherwise just start nginx
+ADD ops/nginx.sh /etc/service/nginx/run
 RUN rm -f /etc/service/nginx/down
 
 CMD ["/sbin/my_init"]

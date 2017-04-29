@@ -138,8 +138,8 @@ module StackCar
         template("#{template_file}.erb", template_file)
      end
      template("database.yml.erb", "config/database.yml")
-     template(".env", ".env-example")
-     template(".env", ".env-prod")
+     template(".env.erb", ".env-example")
+     template(".env.erb", ".env-prod")
 
      if File.exists?('README.md')
        prepend_to_file "README.md" do
@@ -161,7 +161,7 @@ module StackCar
       end
 
       # Do this after we figure out whether to use an empty ops directory or a full one
-      ['env.conf', 'webapp.conf'].each do |template_file|
+      ['env.conf', 'webapp.conf', 'worker.sh'].each do |template_file|
         template("#{template_file}.erb", "ops/#{template_file}")
       end
     end
