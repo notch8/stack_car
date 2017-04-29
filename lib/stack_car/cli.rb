@@ -138,6 +138,9 @@ module StackCar
         template("#{template_file}.erb", template_file)
      end
      template("database.yml.erb", "config/database.yml")
+     template(".env", ".env-example")
+     template(".env", ".env-prod")
+
      if File.exists?('README.md')
        prepend_to_file "README.md" do
          File.read("#{self.class.source_root}/README.md")

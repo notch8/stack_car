@@ -28,21 +28,28 @@ variables:
 <% if options[:postgres] -%>
   POSTGRES_DB: <%= @project_name %>
   POSTGRES_USER: postgres
-  POSTGRES_PASSWORD: DatabaseFTW
+  POSTGRES_PASSWORD: password
+  POSTGRES_HOST: postgres
 <% end -%>
-<% if options[:MYSQL] -%>
+<% if options[:mysql] -%>
   MYSQL_DATABASE: <%= @project_name %>
-  MYSQL_ROOT_PASSWORD: DatabaseFTW
+  MYSQL_ROOT_PASSWORD: password
+  MYSQL_USER: <%= @project_name %>_test
+  MYSQL_PASSWORD: password
+  MYSQL_HOST: mysql
 <% end -%>
   TEST_DB: <%= @project_name %>
   DOCKER_DRIVER: overlay
+  REGISTRY_HOST: registry.gitlab.com
+  REGISTRY_URI: TODO/<%= @project_name %>
+  SITE_URI_BASE: TODO
 
 build:
   stage: build
   script:
     - docker login -u "gitlab-ci-token" -p "$CI_BUILD_TOKEN" $CI_REGISTRY
-    - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_BUILD_REF_SLUG" .
-    - docker push "$CI_REGISTRY_IMAGE:$CI_BUILD_REF_SLUG"
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_PROJECT_NAME-$CI_BUILD_REF_SLUG" .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_PROJECT_NAME-$CI_BUILD_REF_SLUG"
   variables:
     GIT_STRATEGY: fetch
   tags:
@@ -50,7 +57,7 @@ build:
 
 test:
   stage: test
-  image: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_SLUG
+  image: $CI_REGISTRY_IMAGE:$CI_PROJECT_NAME-$CI_BUILD_REF_SLUG
   script:
     - cd /app && bundle exec rake db:create db:schema:load spec
   tags:
@@ -63,19 +70,21 @@ review:
   image: docker:latest
   type: deploy
   environment:
-    name: $CI_BUILD_REF_SLUG
-    url: http://web.$CI_BUILD_REF_SLUG.staging.$SITE_URI
+    name: $CI_PROJECT_NAME-$CI_BUILD_REF_SLUG
+    url: http://web.$CI_PROJECT_NAME-$CI_BUILD_REF_SLUG.staging.$SITE_URI_BASE
     on_stop: stop_review
   only:
     - branches
   except:
     - master
   script:
+<% if options[:rancher] -%>
     - wget https://github.com/rancher/cli/releases/download/v0.4.1/rancher-linux-amd64-v0.4.1.tar.gz
     - tar zxfv rancher-linux-amd64-v0.4.1.tar.gz
     - export RANCHER_ENVIRONMENT=staging
-    - export TAG=$CI_BUILD_REF_SLUG
+    - export TAG=$CI_PROJECT_NAME-$CI_BUILD_REF_SLUG
     - ./rancher-v0.4.1/rancher up -p -d -u -c -s $TAG -f docker-compose-ci.yml
+<% end %>
   variables:
     GIT_STRATEGY: fetch
   tags:
@@ -89,13 +98,13 @@ stop_review:
     - wget https://github.com/rancher/cli/releases/download/v0.4.1/rancher-linux-amd64-v0.4.1.tar.gz
     - tar zxfv rancher-linux-amd64-v0.4.1.tar.gz
     - export RANCHER_ENVIRONMENT=staging
-    - ./rancher-v0.4.1/rancher rm $CI_BUILD_REF_SLUG
+    - ./rancher-v0.4.1/rancher rm $CI_PROJECT_NAME-$CI_BUILD_REF_SLUG
 <% end %>
   variables:
     GIT_STRATEGY: none
   when: manual
   environment:
-    name: $CI_BUILD_REF_SLUG
+    name: $CI_PROJECT_NAME-$CI_BUILD_REF_SLUG
     action: stop
 
 staging:
