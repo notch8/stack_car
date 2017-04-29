@@ -23,6 +23,8 @@ services:
 <% if options[:elasticsearch] -%>
   elasticsearch:
     image: elasticsearch:1.7.1
+    env_file:
+      - .env
     ports:
       - "9200"
       - "9300"

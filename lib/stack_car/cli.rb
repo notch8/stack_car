@@ -161,7 +161,7 @@ module StackCar
       end
 
       # Do this after we figure out whether to use an empty ops directory or a full one
-      ['env.conf', 'webapp.conf', 'worker.sh'].each do |template_file|
+      ['env.conf', 'webapp.conf', 'worker.sh', 'nginx.sh'].each do |template_file|
         template("#{template_file}.erb", "ops/#{template_file}")
       end
     end
@@ -169,7 +169,7 @@ module StackCar
     protected
     def compose_depends(*excludes)
       @compose_depends = []
-      services = [:postgres, :mysql, :elasticsearch, :solr, :redis, :mongodb, :memcached, :delayed_job] - excludes
+      services = [:postgres, :mysql, :elasticsearch, :solr, :redis, :mongodb, :memcached] - excludes
       services.each do |service|
         if options[service]
           @compose_depends << "      - #{service}"
