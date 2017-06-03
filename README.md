@@ -43,7 +43,10 @@ Bug reports and pull requests are welcome on Gitlab at https://gitlab.com/notch8
 
 ## TODO
 
-- Implement build
+- move .env files to dot style
+- make .env secret by default
+- update .gitlab to latest (see learn and ansur)
+
 - Fill out readme
 - Implement deploy
 - Implement deploy templates
