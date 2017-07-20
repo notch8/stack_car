@@ -25,10 +25,16 @@ module StackCar
     end
 
     method_option :service, default: '', type: :string, aliases: '-s'
-    desc "stop", "starts docker-compose with rebuild and orphan removal, defaults to all"
+    desc "stop", "stops the specified running service, defaults to all"
     def stop
       run("docker-compose stop #{options[:service]}")
       run("rm -rf tmp/pids/*")
+    end
+
+    method_option :service, default: 'web', type: :string, aliases: '-s'
+    desc "build", "builds specified service, defaults to web"
+    def build
+      run("docker-compose build #{options[:service]}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
