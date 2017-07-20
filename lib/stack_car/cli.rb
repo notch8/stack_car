@@ -91,12 +91,15 @@ module StackCar
 
     desc "release ENVIRONTMENT", "tag and push and image to the registry"
     def release(environment)
+      timestamp = Time.now.strftime("%Y%m%d%I%M%S")
       registry = "#{ENV['REGISTRY_HOST']}#{ENV['REGISTRY_URI']}"
       run("docker login #{ENV['REGISTRY_HOST']}")
-      run("docker tag #{registry} #{registry}:#{environment}-#{Time.now.strftime("%Y%m%d%I%M%S")}")
-      run("docker push #{registry}:#{environment}-#{Time.now.strftime("%Y%m%d%I%M%S")}")
+      run("docker tag #{registry} #{registry}:#{environment}-#{timestamp}")
+      run("docker push #{registry}:#{environment}-#{timestamp}")
       run("docker tag #{registry} #{registry}:#{environment}-latest")
       run("docker push #{registry}:#{environment}-latest")
+      run("docker tag #{registry} #{registry}:latest")
+      run("docker push #{registry}:latest")
     end
 
     desc "provision ENVIRONMENT", "configure the servers for docker and then deploy an image"
