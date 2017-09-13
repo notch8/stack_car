@@ -77,7 +77,7 @@ services:
 <% end -%>
   web:
     build: .
-    image: "${REGISTRY_HOST}/${REGISTRY_URI}:${TAG:-master}"
+    image: "${REGISTRY_HOST}${REGISTRY_URI}:${TAG:-master}"
     volumes:
       - .:/home/app/webapp
     env_file:

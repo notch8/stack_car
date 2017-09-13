@@ -62,7 +62,7 @@ services:
       - "8080"
 <% end -%>
   web:
-    image: "${REGISTRY_HOST}/${REGISTRY_URI}:${TAG:-master}"
+    image: "${REGISTRY_HOST}${REGISTRY_URI}:${TAG:-master}"
     env_file:
       - .env-example
     labels:

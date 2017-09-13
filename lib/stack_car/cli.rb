@@ -93,23 +93,37 @@ module StackCar
     def release(environment)
       timestamp = Time.now.strftime("%Y%m%d%I%M%S")
       registry = "#{ENV['REGISTRY_HOST']}#{ENV['REGISTRY_URI']}"
-      run("docker login #{ENV['REGISTRY_HOST']}")
-      run("docker tag #{registry} #{registry}:#{environment}-#{timestamp}")
+      tag = ENV["TAG"] || 'latest'
+      unless File.exists?("#{ENV['HOME']}/.docker/config.json") && File.readlines("#{ENV['HOME']}/.docker/config.json").grep(/#{ENV['REGISTRY_HOST']}/).size > 0
+        run("docker login #{ENV['REGISTRY_HOST']}")
+      end
+      run("docker tag #{registry}:#{tag} #{registry}:#{environment}-#{timestamp}")
       run("docker push #{registry}:#{environment}-#{timestamp}")
-      run("docker tag #{registry} #{registry}:#{environment}-latest")
+      run("docker tag #{registry}:#{tag} #{registry}:#{environment}-latest")
       run("docker push #{registry}:#{environment}-latest")
-      run("docker tag #{registry} #{registry}:latest")
+      run("docker tag #{registry}:#{tag} #{registry}:latest")
       run("docker push #{registry}:latest")
     end
 
     desc "provision ENVIRONMENT", "configure the servers for docker and then deploy an image"
     def provision(environment)
-      run("cd ops && ansible-playbook -i hosts -l #{environment}:localhost provision.yml")
+      run("ansible-playbook -i ops/hosts -l #{environment}:localhost ops/provision.yml")
+    end
+
+    method_option :service, default: 'web', type: :string, aliases: '-s'
+    desc "ssh ENVIRONMENT", "log in to a running instance - requires PRODUCTION_SSH to be set"
+    def ssh(environment)
+      target = ENV["#{environment.upcase}_SSH"]
+      if target
+        run(target)
+      else
+        say "Please set #{environment.upcase}_SSH"
+      end
     end
 
     desc "deploy ENVIRONMENT", "deploy an image from the registry"
     def deploy(environment)
-      run("cd ops && ansible-playbook -i hosts -l #{environment}:localhost deploy.yml")
+      run("ansible-playbook -i ops/hosts -l #{environment}:localhost ops/deploy.yml")
     end
 
     method_option :elasticsearch, default: false, type: :boolean, aliases: '-e'

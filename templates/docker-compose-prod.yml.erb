@@ -1,7 +1,7 @@
 version: '2.1'
 services:
   web:
-    image: "${REGISTRY_HOST}/${REGISTRY_URI}:${TAG:-master}"
+    image: "${REGISTRY_HOST}${REGISTRY_URI}:${TAG:-master}"
     environment:
       - RAILS_ENV=production
       - RACK_ENV=production
