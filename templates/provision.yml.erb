@@ -15,6 +15,7 @@
 
 
 - include: deploy.yml
+<% end %>
 <% if options[:rancher] %>
   gather_facts: False
   tasks:
@@ -27,5 +28,5 @@
         TAG: "{{ tag }}"
         RANCHER_ENVIRONMENT: "{{ rancher_env }}"
     - debug: var=result.stdout_lines
-
+- include: deploy.yml
 <% end %>
