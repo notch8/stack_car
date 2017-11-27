@@ -12,10 +12,9 @@ then
     export PASSENGER_APP_ENV=development
 fi
 
-if [ $PASSENGER_APP_ENV == "production" ]
+if [[ $PASSENGER_APP_ENV == "production" ]] || [[ $PASSENGER_APP_ENV == "staging" ]]
 then
-    /sbin/setuser app /bin/bash -l -c 'cd /home/app/webapp && bundle exec rake assets:precompile db:migrate'
+    /sbin/setuser app /bin/bash -l -c 'cd /home/app/webapp && bundle exec rake db:migrate'
 fi
-
 
 exec /usr/sbin/nginx

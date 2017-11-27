@@ -5,6 +5,7 @@ services:
     image: postgres
     env_file:
       - .env
+      - .env.development
     ports:
       - "5432"
     volumes:
@@ -15,6 +16,7 @@ services:
     image: mysql
     env_file:
       - .env
+      - .env.development
     ports:
       - '3306'
     volumes:
@@ -25,6 +27,7 @@ services:
     image: elasticsearch:1.7.1
     env_file:
       - .env
+      - .env.development
     ports:
       - "9200"
       - "9300"
@@ -34,6 +37,9 @@ services:
 <% if options[:solr] %>
   solr:
     image: solr:latest
+    env_file:
+      - .env
+      - .env.development
     ports:
       - "8983"
     volumes:
@@ -47,6 +53,9 @@ services:
 <% if options[:redis] -%>
   redis:
     image: 'redis:3.2-alpine'
+    env_file:
+      - .env
+      - .env.development
     command: redis-server
     ports:
       - '6379'
@@ -56,6 +65,9 @@ services:
 <% if options[:mongodb] -%>
   mongodb:
     image: mongo:2.6.12
+    env_file:
+      - .env
+      - .env.development
     volumes:
       - 'mongodb:/data/db'
     ports:
@@ -64,24 +76,39 @@ services:
 <% if options[:memcached] -%>
   memcached:
     image: memcached
+    env_file:
+      - .env
+      - .env.development
     ports:
       - "11211"
 <% end -%>
 <% if options[:fcrepo] -%>
   fcrepo:
     image: botimer/fcrepo:4.5.1
+    env_file:
+      - .env
+      - .env.development
     volumes:
       - 'fcrepo:/opt/data'
     ports:
       - "8080"
 <% end -%>
+
+  builder:
+    image: "${REGISTRY_HOST}${REGISTRY_URI}/builder:latest"
+    build:
+      context: ./ops
+      dockerfile: Dockerfile.builder
+    #TODO dont start
+
   web:
     build: .
     image: "${REGISTRY_HOST}${REGISTRY_URI}:${TAG:-master}"
-    volumes:
-      - .:/home/app/webapp
     env_file:
       - .env
+      - .env.development
+    volumes:
+      - .:/home/app/webapp
     # Keep the stdin open, so we can attach to our app container's process
     # and do things such as byebug, etc:
     stdin_open: true

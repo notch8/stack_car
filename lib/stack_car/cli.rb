@@ -30,6 +30,7 @@ module StackCar
       run("docker-compose stop #{options[:service]}")
       run("rm -rf tmp/pids/*")
     end
+    map down: :stop
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "build", "builds specified service, defaults to web"
@@ -107,10 +108,10 @@ module StackCar
 
     desc "provision ENVIRONMENT", "configure the servers for docker and then deploy an image"
     def provision(environment)
-      run("ansible-playbook -i ops/hosts -l #{environment}:localhost ops/provision.yml")
+      # TODO make dotenv load a specific environment?
+      run("dotenv ansible-playbook -i ops/hosts -l #{environment}:localhost ops/provision.yml")
     end
 
-    method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "ssh ENVIRONMENT", "log in to a running instance - requires PRODUCTION_SSH to be set"
     def ssh(environment)
       target = ENV["#{environment.upcase}_SSH"]
@@ -123,7 +124,7 @@ module StackCar
 
     desc "deploy ENVIRONMENT", "deploy an image from the registry"
     def deploy(environment)
-      run("ansible-playbook -i ops/hosts -l #{environment}:localhost ops/deploy.yml")
+      run("dotenv ansible-playbook -i ops/hosts -l #{environment}:localhost ops/deploy.yml")
     end
 
     method_option :elasticsearch, default: false, type: :boolean, aliases: '-e'
@@ -156,13 +157,12 @@ module StackCar
       @db_libs = @db_libs.join(' ')
 
 
-     ['.dockerignore', 'Dockerfile', 'docker-compose.yml', 'docker-compose-ci.yml', 'docker-compose-prod.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
+     ['.dockerignore', 'Dockerfile', 'docker-compose.yml', 'docker-compose.ci.yml', 'docker-compose.production.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
        puts template_file
         template("#{template_file}.erb", template_file)
      end
      template("database.yml.erb", "config/database.yml")
-     template(".env.erb", ".env-example")
-     template(".env.erb", ".env-prod")
+     template(".env.erb", ".env.production")
 
      if File.exists?('README.md')
        prepend_to_file "README.md" do
@@ -175,7 +175,7 @@ module StackCar
      end
       if options[:deploy] || options[:rancher]
         directory('ops')
-        ['hosts'].each do |template_file|
+        ['hosts', 'Dockerfile.builder', 'deploy.yml', 'provision.yml'].each do |template_file|
           template("#{template_file}.erb", "ops/#{template_file}")
         end
         say 'Please update ops/hosts with the correct server addresses'

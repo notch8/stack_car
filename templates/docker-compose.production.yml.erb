@@ -15,7 +15,8 @@ services:
       rap.le_test: true
       io.rancher.container.pull_image: always
     env_file:
-      .env-prod
+      - .env
+      - .env.production
 
 <% if options[:rancher] -%>
 volumes:

@@ -1,3 +1,6 @@
+[ci]
+XX.XXX.XXX.XXX
+
 [staging]
 XX.XXX.XXX.XXX ansible_user=centos
 
@@ -5,16 +8,40 @@ XX.XXX.XXX.XXX ansible_user=centos
 XX.XXX.XXX.XXX ansible_user=ubuntu
 
 [servers:children]
+ci
 staging
 production
 
 [servers:vars]
 registry_host=registry.gitlab.com
+<% if options[:docker] -%>
 compose_dir=/var/www
+<% end %>
 project_name=<%= @project_name %>
+
+[ci:vars]
+tag=staging-latest
+deploy_env=staging
+app_name=CHANGEME
+<% if options[:rancher] %>
+rancher_env=CHANGEME
+deploy_url=CHANGEME
+<% end %>
 
 [staging:vars]
 tag=staging-latest
+deploy_env=staging
+app_name=CHANGEME
+<% if options[:rancher] %>
+rancher_env=CHANGEME
+deploy_url=CHANGEME
+<% end %>
 
 [production:vars]
 tag=production-latest
+deploy_env=production
+app_name=CHANGEME
+<% if options[:rancher] %>
+rancher_env=CHANGEME
+deploy_url=CHANGEME
+<% end %>

@@ -1,5 +1,0 @@
-#!/bin/bash
-
-set -x
-
-curl -X POST -H "Content-Type: application/json" -d '{ "push_data": { "tag": "$TAG" }, "repository": { "repo_name":"$REGISTRY_HOST$REGISTRY_URI" }}' $DEPLOY_HOOK

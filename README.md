@@ -8,7 +8,6 @@ Stack Car is an opinionated set of tools around Docker and Rails.  It provides c
 ## Installation
 
 Because stack_car will be used to run your application in side of Docker, you want to install stack car in to your system Ruby instead of putting in your applications Gemfile
-u 
 
 ```bash
 gem install stack_car 
@@ -16,12 +15,11 @@ gem install stack_car
 
 ## Usage
 
-
-Commands are accesible via the "sc" short cut. Note: this will need to be in your command path in front of the spreadsheet command (sc), which is a fairly archaiac unix spreadsheet tool. We're guessing you don't edit a lot of spreadsheets in your terminal, but if you do, we also figure you can override your path order pretty easily.
+Commands are accesible via the "sc" short cut. Note: this will need to be in your command path in front of the spreadsheet command (sc), which is a fairly archaiac unix spreadsheet tool. We're guessing you don't edit a lot of spreadsheets in your terminal, but if you do, we also figure you can override your path order pretty easily.  Many of these commands have short versions or alias to make remembering them easier.  If there are obvious aliases missing, PRs are welcome.
 
 ```ruby
 Commands:
-  stack_car bundle_exec ARGS  # wraps docker-compose exec web bundle exec unless --service is used to specify
+  stack_car bundle_exec ARGS  # wraps docker-compose exec web bundle exec unless --service is used to specify (sc be ARGS)
   stack_car console ARGS      # shortcut to start rails console
   stack_car dockerize DIR     # Will copy the docker tempates in to your project, see options for supported dependencies
   stack_car exec ARGS         # wraps docker-compose exec web unless --service is used to specify

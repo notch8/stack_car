@@ -2,9 +2,9 @@
 
 1) Install Docker.app 
 
-2) Get .env file from team member or copy it from .env-example and fill it out
+2) gem install stack_car
 
-3) gem install stack_car
+3) We recommend committing .env to your repo with good defaults. .env.development, .env.production etc can be used for local overrides and should not be in the repo.
 
 4) sc up
 
