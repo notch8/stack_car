@@ -1,0 +1,48 @@
+FROM phusion/passenger-ruby23:0.9.28
+
+RUN <%= pre_apt_string %> && \
+    curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
+    apt-get update -qq && \
+    apt-get install -y build-essential nodejs pv tzdata libsasl2-dev <%= apt_packages_string %> && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    <%= post_apt_string %>
+
+<% if options[:fcrepo] %>
+RUN mkdir -p /opt/fits && \
+    curl -fSL -o /opt/fits-0.8.5.zip http://projects.iq.harvard.edu/files/fits/files/fits-0.8.5.zip && \
+    cd /opt && \
+    unzip fits-0.8.5.zip && \
+    chmod +x fits-0.8.5/fits.sh
+
+<% end -%>
+
+RUN rm /etc/nginx/sites-enabled/default
+
+ENV APP_HOME /home/app/webapp
+RUN mkdir $APP_HOME
+WORKDIR $APP_HOME
+
+ENV BUNDLE_GEMFILE=$APP_HOME/Gemfile \
+  BUNDLE_JOBS=4
+
+ADD Gemfile* $APP_HOME/
+RUN bundle check || bundle install
+
+<% if options[:delayed_job] %>
+RUN touch /var/log/worker.log && chmod 666 /var/log/worker.log
+RUN mkdir /etc/service/worker
+ADD ops/worker.sh /etc/service/worker/run
+RUN chmod +x /etc/service/worker/run
+<% end %>
+
+ADD . $APP_HOME
+RUN chown -R app $APP_HOME
+
+# this is so that these items are cached and only have to be updated
+RUN  /sbin/setuser app /bin/bash -l -c 'cd /home/app/webapp && DB_ADAPTER=nulldb bundle exec rake assets:precompile'
+# Asset complie and migrate if prod, otherwise just start nginx
+ADD ops/nginx.sh /etc/service/nginx/run
+RUN chmod +x /etc/service/nginx/run
+RUN rm -f /etc/service/nginx/down
+

@@ -94,12 +94,11 @@ services:
       - "8080"
 <% end -%>
 
-  builder:
-    image: "${REGISTRY_HOST}${REGISTRY_URI}/builder:latest"
+  base:
+    image: "${REGISTRY_HOST}${REGISTRY_URI}/base:latest"
     build:
-      context: ./ops
-      dockerfile: Dockerfile.builder
-    #TODO dont start
+      context: .
+      dockerfile: Dockerfile
 
   web:
     build: .

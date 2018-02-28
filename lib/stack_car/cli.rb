@@ -140,6 +140,7 @@ module StackCar
     method_option :sidekiq, default: false, type: :boolean, aliases: '-sq' # TODO
     method_option :mongodb, default: false, type: :boolean, aliases: '-mg'
     method_option :memcached, default: false, type: :boolean, aliases: '-mc'
+    method_option :yarn, default: false, type: :boolean, aliases: '-y'
     desc 'dockerize DIR', 'Will copy the docker tempates in to your project, see options for supported dependencies'
     long_desc <<-DOCKERIZE
 
@@ -150,18 +151,33 @@ module StackCar
     def dockerize(dir=".")
       Dir.chdir(dir)
       @project_name = File.basename(File.expand_path(dir))
-      @db_libs = []
-      @db_libs << "libpq-dev postgresql-client" if options[:postgres]
-      @db_libs << "mysql-client" if options[:mysql]
-      @db_libs << "libc6-dev libreoffice imagemagick unzip" if options[:fcrepo]
-      @db_libs = @db_libs.join(' ')
+      apt_packages << "libpq-dev postgresql-client" if options[:postgres]
+      apt_packages << "mysql-client" if options[:mysql]
+      pre_apt << "echo 'Downloading Packages'"
+      post_apt << "echo 'Packages Downloaded'"
 
+      if options[:yarn]
+        apt_packages << 'yarn'
+        pre_apt << "curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -"
+        pre_apt << "echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list"
+        post_apt << "yarn config set no-progress"
+        post_apt << "yarn config set silent"
+      end
 
-     ['.dockerignore', 'Dockerfile', 'docker-compose.yml', 'docker-compose.ci.yml', 'docker-compose.production.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
+      if options[:fcrepo]
+        apt_packages << "libc6-dev libreoffice imagemagick unzip ghostscript ffmpeg"
+
+        post_apt << "mkdir -p /opt/fits"
+        post_apt << "curl -fSL -o /opt/fits-1.0.5.zip http://projects.iq.harvard.edu/files/fits/files/fits-1.0.5.zip"
+        post_apt << "cd /opt && unzip fits-1.0.5.zip && chmod +X fits-1.0.5/fits.sh"
+      end
+
+     ['.dockerignore', 'Dockerfile', 'Dockerfile.base', 'docker-compose.yml', 'docker-compose.ci.yml', 'docker-compose.production.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
        puts template_file
         template("#{template_file}.erb", template_file)
      end
      template("database.yml.erb", "config/database.yml")
+     template(".env.development.erb", ".env.development")
      template(".env.erb", ".env.production")
 
      if File.exists?('README.md')
@@ -175,7 +191,7 @@ module StackCar
      end
       if options[:deploy] || options[:rancher]
         directory('ops')
-        ['hosts', 'Dockerfile.builder', 'deploy.yml', 'provision.yml'].each do |template_file|
+        ['hosts', 'deploy.yml', 'provision.yml'].each do |template_file|
           template("#{template_file}.erb", "ops/#{template_file}")
         end
         say 'Please update ops/hosts with the correct server addresses'
@@ -189,6 +205,29 @@ module StackCar
       end
     end
 
+    def apt_packages
+      @apt_packages ||= []
+    end
+
+    def apt_packages_string
+      apt_packages.join(" ")
+    end
+
+    def pre_apt
+      @pre_apt ||= []
+    end
+
+    def pre_apt_string
+      pre_apt.join(" && \\\n")
+    end
+
+    def post_apt
+      @post_apt ||= []
+    end
+
+    def post_apt_string
+      post_apt.join(" && \\\n")
+    end
     protected
     def compose_depends(*excludes)
       @compose_depends = []
