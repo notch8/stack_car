@@ -98,7 +98,7 @@ services:
     image: "${REGISTRY_HOST}${REGISTRY_URI}/base:latest"
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.base
 
   web:
     build: .
@@ -114,7 +114,7 @@ services:
     # Enable sending signals (CTRL+C, CTRL+P + CTRL+Q) into the container:
     tty: true
     ports:
-      - "80"
+      - "${DOCKER_PORT}"
     depends_on:
 <%= compose_depends %>
 
@@ -136,4 +136,7 @@ volumes:
 <% end -%>
 <% if options[:mongodb] -%>
   mongodb:
+<% end -%>
+<% if options[:fcrepo] -%>
+  fcrepo:
 <% end -%>

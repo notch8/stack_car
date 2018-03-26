@@ -2,5 +2,9 @@
 
 # `/sbin/setuser memcache` runs the given command as the user `memcache`.
 # If you omit that part, the command will be run as root.
+<% if options[:sidekiq] %>
+exec /sbin/setuser app /bin/bash -l -c 'cd /home/app/webapp && bundle exec sidekiq >>/var/log/worker.log 2>&1'<% end %>
 
+<% if options[:delayed_job] %>
 exec /sbin/setuser app /bin/bash -l -c 'cd /home/app/webapp && ./bin/delayed_job run >>/var/log/worker.log 2>&1'
+<% end %>

@@ -93,6 +93,7 @@ module StackCar
     desc "release ENVIRONTMENT", "tag and push and image to the registry"
     def release(environment)
       timestamp = Time.now.strftime("%Y%m%d%I%M%S")
+      sha = `git rev-parse HEAD`[0-7]
       registry = "#{ENV['REGISTRY_HOST']}#{ENV['REGISTRY_URI']}"
       tag = ENV["TAG"] || 'latest'
       unless File.exists?("#{ENV['HOME']}/.docker/config.json") && File.readlines("#{ENV['HOME']}/.docker/config.json").grep(/#{ENV['REGISTRY_HOST']}/).size > 0
@@ -100,6 +101,8 @@ module StackCar
       end
       run("docker tag #{registry}:#{tag} #{registry}:#{environment}-#{timestamp}")
       run("docker push #{registry}:#{environment}-#{timestamp}")
+      run("docker tag #{registry}:#{tag} #{registry}:#{environment}-#{sha}")
+      run("docker push #{registry}:#{environment}-#{sha}")
       run("docker tag #{registry}:#{tag} #{registry}:#{environment}-latest")
       run("docker push #{registry}:#{environment}-latest")
       run("docker tag #{registry}:#{tag} #{registry}:latest")
@@ -159,7 +162,7 @@ module StackCar
       if options[:yarn]
         apt_packages << 'yarn'
         pre_apt << "curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -"
-        pre_apt << "echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list"
+        pre_apt << "echo 'deb https://dl.yarnpkg.com/debian/ stable main' | tee /etc/apt/sources.list.d/yarn.list"
         post_apt << "yarn config set no-progress"
         post_apt << "yarn config set silent"
       end
@@ -189,6 +192,7 @@ module StackCar
          File.read("#{self.class.source_root}/README.md")
        end
      end
+     append_to_file("Gemfile", "gem 'activerecord-nulldb-adapter'")
       if options[:deploy] || options[:rancher]
         directory('ops')
         ['hosts', 'deploy.yml', 'provision.yml'].each do |template_file|
@@ -203,6 +207,20 @@ module StackCar
       ['env.conf', 'webapp.conf', 'worker.sh', 'nginx.sh'].each do |template_file|
         template("#{template_file}.erb", "ops/#{template_file}")
       end
+
+      say 'Please find and replace all CHANGEME lines'
+    end
+
+    protected
+    def compose_depends(*excludes)
+      @compose_depends = []
+      services = [:postgres, :mysql, :elasticsearch, :solr, :redis, :mongodb, :memcached] - excludes
+      services.each do |service|
+        if options[service]
+          @compose_depends << "      - #{service}"
+        end
+      end
+      return @compose_depends.join("\n")
     end
 
     def apt_packages
@@ -228,16 +246,6 @@ module StackCar
     def post_apt_string
       post_apt.join(" && \\\n")
     end
-    protected
-    def compose_depends(*excludes)
-      @compose_depends = []
-      services = [:postgres, :mysql, :elasticsearch, :solr, :redis, :mongodb, :memcached] - excludes
-      services.each do |service|
-        if options[service]
-          @compose_depends << "      - #{service}"
-        end
-      end
-      return @compose_depends.join("\n")
-    end
+
   end
 end
