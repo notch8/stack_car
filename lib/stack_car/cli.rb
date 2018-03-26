@@ -101,8 +101,8 @@ module StackCar
       end
       run("docker tag #{registry}:#{tag} #{registry}:#{environment}-#{timestamp}")
       run("docker push #{registry}:#{environment}-#{timestamp}")
-      run("docker tag #{registry}:#{tag} #{registry}:#{environment}-#{sha}")
-      run("docker push #{registry}:#{environment}-#{sha}")
+      run("docker tag #{registry}:#{tag} #{registry}:#{sha}")
+      run("docker push #{registry}:#{sha}")
       run("docker tag #{registry}:#{tag} #{registry}:#{environment}-latest")
       run("docker push #{registry}:#{environment}-latest")
       run("docker tag #{registry}:#{tag} #{registry}:latest")
