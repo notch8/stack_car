@@ -10,6 +10,10 @@ module StackCar
       File.join(File.dirname(__FILE__), '..', '..', 'templates')
     end
 
+    def self.exit_on_failure?
+      true
+    end
+
     method_option :service, default: 'web', type: :string, aliases: '-s'
     method_option :build, default: false, type: :boolean, aliases: '-b'
     method_option :logs, default: true, type: :boolean
