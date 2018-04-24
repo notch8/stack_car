@@ -97,7 +97,7 @@ module StackCar
     desc "release ENVIRONTMENT", "tag and push and image to the registry"
     def release(environment)
       timestamp = Time.now.strftime("%Y%m%d%I%M%S")
-      sha = `git rev-parse HEAD`[0-7]
+      sha = `git rev-parse HEAD`[0..7]
       registry = "#{ENV['REGISTRY_HOST']}#{ENV['REGISTRY_URI']}"
       tag = ENV["TAG"] || 'latest'
       unless File.exists?("#{ENV['HOME']}/.docker/config.json") && File.readlines("#{ENV['HOME']}/.docker/config.json").grep(/#{ENV['REGISTRY_HOST']}/).size > 0
