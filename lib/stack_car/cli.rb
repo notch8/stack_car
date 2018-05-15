@@ -97,7 +97,7 @@ module StackCar
     desc "release ENVIRONTMENT", "tag and push and image to the registry"
     def release(environment)
       timestamp = Time.now.strftime("%Y%m%d%I%M%S")
-      sha = `git rev-parse HEAD`[0..7]
+      sha = `git rev-parse HEAD`[0..8]
       registry = "#{ENV['REGISTRY_HOST']}#{ENV['REGISTRY_URI']}"
       tag = ENV["TAG"] || 'latest'
       unless File.exists?("#{ENV['HOME']}/.docker/config.json") && File.readlines("#{ENV['HOME']}/.docker/config.json").grep(/#{ENV['REGISTRY_HOST']}/).size > 0
@@ -116,7 +116,7 @@ module StackCar
     desc "provision ENVIRONMENT", "configure the servers for docker and then deploy an image"
     def provision(environment)
       # TODO make dotenv load a specific environment?
-      run("dotenv ansible-playbook -i ops/hosts -l #{environment}:localhost ops/provision.yml")
+      run("DEPLOY_ENV=#{environment} dotenv ansible-playbook -i ops/hosts -l #{environment}:localhost ops/provision.yml")
     end
 
     desc "ssh ENVIRONMENT", "log in to a running instance - requires PRODUCTION_SSH to be set"
@@ -131,7 +131,7 @@ module StackCar
 
     desc "deploy ENVIRONMENT", "deploy an image from the registry"
     def deploy(environment)
-      run("dotenv ansible-playbook -i ops/hosts -l #{environment}:localhost ops/deploy.yml")
+      run("DEPLOY_HOOK=$DEPLOY_HOOK_#{environment.upcase} dotenv ansible-playbook -i ops/hosts -l #{environment}:localhost ops/deploy.yml")
     end
 
     method_option :elasticsearch, default: false, type: :boolean, aliases: '-e'
