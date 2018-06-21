@@ -81,6 +81,12 @@ module StackCar
     map ex: :exec
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
+    desc 'sh ARGS', "launch a shell using docker-compose exec, sets tty properly"
+    def sh(*args)
+      run("docker-compose exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput lines\`\" #{options[:service]} bash #{args.join(' ')}")
+    end
+
+    method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "bundle_exec ARGS", "wraps docker-compose exec web bundle exec unless --service is used to specify"
     def bundle_exec(*args)
       run("docker-compose exec #{options[:service]} bundle exec #{args.join(' ')}")
