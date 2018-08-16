@@ -25,78 +25,78 @@ module StackCar
         run("docker-compose pull #{options[:service]}")
       end
 
-      run("docker-compose up #{args.join(' ')} #{options[:service]}")
+      run_with_exit("docker-compose up #{args.join(' ')} #{options[:service]}")
     end
 
     method_option :service, default: '', type: :string, aliases: '-s'
     desc "stop", "stops the specified running service, defaults to all"
     def stop
       run("docker-compose stop #{options[:service]}")
-      run("rm -rf tmp/pids/*")
+      run_with_exit("rm -rf tmp/pids/*")
     end
     map down: :stop
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "build", "builds specified service, defaults to web"
     def build
-      run("docker-compose build #{options[:service]}")
+      run_with_exit("docker-compose build #{options[:service]}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "push ARGS", "wraps docker-compose push web unless --service is used to specify"
     def push(*args)
-      run("docker-compose push #{options[:service]} #{args.join(' ')}")
+      run_with_exit("docker-compose push #{options[:service]} #{args.join(' ')}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "pull ARGS", "wraps docker-compose pull web unless --service is used to specify"
     def pull(*args)
-      run("docker-compose pull #{options[:service]} #{args.join(' ')}")
+      run_with_exit("docker-compose pull #{options[:service]} #{args.join(' ')}")
     end
 
     method_option :service, default: '', type: :string, aliases: '-s'
     desc "ps ARGS", "wraps docker-compose pull web unless --service is used to specify"
     def ps(*args)
-      run("docker-compose ps #{options[:service]} #{args.join(' ')}")
+      run_with_exit("docker-compose ps #{options[:service]} #{args.join(' ')}")
     end
     map status: :ps
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "bundle ARGS", "wraps docker-compose run web unless --service is used to specify"
     def bundle(*args)
-      run("docker-compose exec #{options[:service]} bundle")
+      run_with_exit("docker-compose exec #{options[:service]} bundle")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "walk ARGS", "wraps docker-compose run web unless --service is used to specify"
     def walk(*args)
-      run("docker-compose run #{options[:service]} #{args.join(' ')}")
+      run_with_exit("docker-compose run #{options[:service]} #{args.join(' ')}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "exec ARGS", "wraps docker-compose exec web unless --service is used to specify"
     def exec(*args)
-      run("docker-compose exec #{options[:service]} #{args.join(' ')}")
+      run_with_exit("docker-compose exec #{options[:service]} #{args.join(' ')}")
     end
     map ex: :exec
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc 'sh ARGS', "launch a shell using docker-compose exec, sets tty properly"
     def sh(*args)
-      run("docker-compose exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput lines\`\" #{options[:service]} bash #{args.join(' ')}")
+      run_with_exit("docker-compose exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput lines\`\" #{options[:service]} bash #{args.join(' ')}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "bundle_exec ARGS", "wraps docker-compose exec web bundle exec unless --service is used to specify"
     def bundle_exec(*args)
-      run("docker-compose exec #{options[:service]} bundle exec #{args.join(' ')}")
+      run_with_exit("docker-compose exec #{options[:service]} bundle exec #{args.join(' ')}")
     end
     map be: :bundle_exec
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "console ARGS", "shortcut to start rails console"
     def console(*args)
-      run("docker-compose exec #{options[:service]} bundle exec rails console #{args.join(' ')}")
+      run_with_exit("docker-compose exec #{options[:service]} bundle exec rails console #{args.join(' ')}")
     end
     map rc: :console
 
@@ -107,29 +107,29 @@ module StackCar
       registry = "#{ENV['REGISTRY_HOST']}#{ENV['REGISTRY_URI']}"
       tag = ENV["TAG"] || 'latest'
       unless File.exists?("#{ENV['HOME']}/.docker/config.json") && File.readlines("#{ENV['HOME']}/.docker/config.json").grep(/#{ENV['REGISTRY_HOST']}/).size > 0
-        run("docker login #{ENV['REGISTRY_HOST']}")
+        run_with_exit("docker login #{ENV['REGISTRY_HOST']}")
       end
-      run("docker tag #{registry}:#{tag} #{registry}:#{environment}-#{timestamp}")
-      run("docker push #{registry}:#{environment}-#{timestamp}")
-      run("docker tag #{registry}:#{tag} #{registry}:#{sha}")
-      run("docker push #{registry}:#{sha}")
-      run("docker tag #{registry}:#{tag} #{registry}:#{environment}-latest")
-      run("docker push #{registry}:#{environment}-latest")
-      run("docker tag #{registry}:#{tag} #{registry}:latest")
-      run("docker push #{registry}:latest")
+      run_with_exit("docker tag #{registry}:#{tag} #{registry}:#{environment}-#{timestamp}")
+      run_with_exit("docker push #{registry}:#{environment}-#{timestamp}")
+      run_with_exit("docker tag #{registry}:#{tag} #{registry}:#{sha}")
+      run_with_exit("docker push #{registry}:#{sha}")
+      run_with_exit("docker tag #{registry}:#{tag} #{registry}:#{environment}-latest")
+      run_with_exit("docker push #{registry}:#{environment}-latest")
+      run_with_exit("docker tag #{registry}:#{tag} #{registry}:latest")
+      run_with_exit("docker push #{registry}:latest")
     end
 
     desc "provision ENVIRONMENT", "configure the servers for docker and then deploy an image"
     def provision(environment)
       # TODO make dotenv load a specific environment?
-      run("DEPLOY_ENV=#{environment} dotenv ansible-playbook -i ops/hosts -l #{environment}:localhost ops/provision.yml")
+      run_with_exit("DEPLOY_ENV=#{environment} dotenv ansible-playbook -i ops/hosts -l #{environment}:localhost ops/provision.yml")
     end
 
     desc "ssh ENVIRONMENT", "log in to a running instance - requires PRODUCTION_SSH to be set"
     def ssh(environment)
       target = ENV["#{environment.upcase}_SSH"]
       if target
-        run(target)
+        run_with_exit(target)
       else
         say "Please set #{environment.upcase}_SSH"
       end
@@ -137,7 +137,7 @@ module StackCar
 
     desc "deploy ENVIRONMENT", "deploy an image from the registry"
     def deploy(environment)
-      run("DEPLOY_HOOK=$DEPLOY_HOOK_#{environment.upcase} dotenv ansible-playbook -i ops/hosts -l #{environment}:localhost ops/deploy.yml")
+      run_with_exit("DEPLOY_HOOK=$DEPLOY_HOOK_#{environment.upcase} dotenv ansible-playbook -i ops/hosts -l #{environment}:localhost ops/deploy.yml")
     end
 
     method_option :elasticsearch, default: false, type: :boolean, aliases: '-e'
@@ -255,6 +255,13 @@ module StackCar
 
     def post_apt_string
       post_apt.join(" && \\\n")
+    end
+
+    def run_with_exit(*args)
+      result = run(*args)
+      if !result
+        exit(1)
+      end
     end
 
   end
