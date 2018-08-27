@@ -19,6 +19,7 @@ module StackCar
     method_option :logs, default: true, type: :boolean
     desc "up", "starts docker-compose with rebuild and orphan removal, defaults to web"
     def up
+      ensure_development_env
       args = ['--remove-orphans']
       args << '--build' if options[:build]
       if options[:build]
@@ -31,6 +32,7 @@ module StackCar
     method_option :service, default: '', type: :string, aliases: '-s'
     desc "stop", "stops the specified running service, defaults to all"
     def stop
+      ensure_development_env
       run("docker-compose stop #{options[:service]}")
       run_with_exit("rm -rf tmp/pids/*")
     end
@@ -39,6 +41,7 @@ module StackCar
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "build", "builds specified service, defaults to web"
     def build
+      ensure_development_env
       run_with_exit("docker-compose build #{options[:service]}")
     end
 
@@ -261,6 +264,12 @@ module StackCar
       result = run(*args)
       if !result
         exit(1)
+      end
+    end
+
+    def ensure_development_env
+      if !File.exists?('.env.development')
+        template(".env.development.erb", ".env.development")
       end
     end
 
