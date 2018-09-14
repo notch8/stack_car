@@ -275,6 +275,6 @@ module StackCar
 
     def dotenv(environment='development')
       "dotenv -f .env.#{environment},.env"
-
+    end
   end
 end
