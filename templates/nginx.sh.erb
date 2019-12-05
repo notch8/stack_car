@@ -12,6 +12,11 @@ then
     export PASSENGER_APP_ENV=development
 fi
 
+if [[ $PASSENGER_APP_ENV == "development" ]] || [[ $PASSENGER_APP_ENV == "test" ]]
+then
+    /sbin/setuser app /bin/bash -l -c 'cd /home/app/webapp && RAILS_ENV=test bundle exec rake db:test:prepare db:migrate'
+fi
+
 if [[ $PASSENGER_APP_ENV == "production" ]] || [[ $PASSENGER_APP_ENV == "staging" ]]
 then
     /sbin/setuser app /bin/bash -l -c 'cd /home/app/webapp && bundle exec rake db:migrate'
