@@ -143,19 +143,22 @@ module StackCar
       run_with_exit("DEPLOY_HOOK=$DEPLOY_HOOK_#{environment.upcase} #{dotenv(environment)} ansible-playbook -i ops/hosts -l #{environment}:localhost ops/deploy.yml")
     end
 
-    method_option :elasticsearch, default: false, type: :boolean, aliases: '-e'
-    method_option :solr, default: false, type: :boolean, aliases: '-s'
-    method_option :postgres, default: false, type: :boolean, aliases: '-p'
-    method_option :mysql, default: false, type: :boolean, aliases: '-m'
-    method_option :redis, default: false, type: :boolean, aliases: '-r'
     method_option :delayed_job, default: false, type: :boolean, aliases: '-j'
-    method_option :fcrepo, default: false, type: :boolean, aliases: '-f'
     method_option :deploy, default: false, type: :boolean, aliases: '-d'
+    method_option :elasticsearch, default: false, type: :boolean, aliases: '-e'
+    method_option :fcrepo, default: false, type: :boolean, aliases: '-f'
+    method_option :helm, default: false, type: :boolean, aliases: '-h'
+    method_option :git, default: true, type: :boolean, aliases: '-g'
     method_option :heroku, default: false, type: :boolean, aliases: '-h'
-    method_option :rancher, default: false, type: :boolean, aliases: '-dr'
-    method_option :sidekiq, default: false, type: :boolean, aliases: '-sq' # TODO
-    method_option :mongodb, default: false, type: :boolean, aliases: '-mg'
+    method_option :imagemagick, default: false, type: :boolean, aliases: '-i'
     method_option :memcached, default: false, type: :boolean, aliases: '-mc'
+    method_option :mongodb, default: false, type: :boolean, aliases: '-mg'
+    method_option :mysql, default: false, type: :boolean, aliases: '-m'
+    method_option :postgres, default: false, type: :boolean, aliases: '-p'
+    method_option :rancher, default: false, type: :boolean, aliases: '-dr'
+    method_option :redis, default: false, type: :boolean, aliases: '-r'
+    method_option :sidekiq, default: false, type: :boolean, aliases: '-sq' # TODO
+    method_option :solr, default: false, type: :boolean, aliases: '-s'
     method_option :yarn, default: false, type: :boolean, aliases: '-y'
     desc 'dockerize DIR', 'Will copy the docker tempates in to your project, see options for supported dependencies'
     long_desc <<-DOCKERIZE
@@ -166,11 +169,16 @@ module StackCar
     DOCKERIZE
     def dockerize(dir=".")
       Dir.chdir(dir)
+      # Commandline overrides config files
+      options = file_config.merge(options)
       @project_name = File.basename(File.expand_path(dir))
       apt_packages << "libpq-dev postgresql-client" if options[:postgres]
       apt_packages << "mysql-client" if options[:mysql]
+      apt_packages << "imagemagick" if options[:imagemagick]
       pre_apt << "echo 'Downloading Packages'"
       post_apt << "echo 'Packages Downloaded'"
+
+      options[:build_image] = "#{@project_name}/builder:latest" if options[:build_image].blank?
 
       if options[:yarn]
         apt_packages << 'yarn'
@@ -188,7 +196,7 @@ module StackCar
         post_apt << "cd /opt && unzip fits-1.0.5.zip && chmod +X fits-1.0.5/fits.sh"
       end
 
-     ['.dockerignore', 'Dockerfile', 'Dockerfile.base', 'docker-compose.yml', 'docker-compose.ci.yml', 'docker-compose.production.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
+     ['.dockerignore', 'Dockerfile', 'Dockerfile.base', 'docker-compose.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
        puts template_file
         template("#{template_file}.erb", template_file)
      end
@@ -264,6 +272,26 @@ module StackCar
       result = run(*args)
       if !result
         exit(1)
+      end
+    end
+
+    def file_config
+      path = find_config(Dir.pwd)
+      if path
+        JSON.parse(File.read(path))
+      else
+        {}
+      end
+    end
+
+    def find_config(dir)
+      path = File.join(dir, '.stackcar_rc')
+      if File.exists?(path)
+        return path
+      elsif dir == "/"
+        return nil
+      else
+        return find_config(File.dirname(dir))
       end
     end
 
