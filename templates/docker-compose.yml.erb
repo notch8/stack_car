@@ -99,13 +99,23 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.base
+      args:
+        DEPLOY_KEY: "${DEPLOY_KEY}"
+        APP_NAME: "${APP_NAME}"
+    env_file:
+      - .env
+      - .env.development
 
-  web:
+  app:
     build: .
     image: "${REGISTRY_HOST}${REGISTRY_URI}:${TAG:-master}"
     env_file:
       - .env
       - .env.development
+    args:
+      DEPLOY_KEY: "${DEPLOY_KEY}"
+      REPO_URL: "${REPO_URL}"
+      BRANCH: "${BRANCH}"
     volumes:
       - .:/home/app/webapp
     # Keep the stdin open, so we can attach to our app container's process
@@ -113,10 +123,31 @@ services:
     stdin_open: true
     # Enable sending signals (CTRL+C, CTRL+P + CTRL+Q) into the container:
     tty: true
+
+  web:
+    extends:
+      app:
     ports:
-      - "${DOCKER_PORT}"
+      - "${WEB_PORT}"
+    environment:
+      - VIRTUAL_HOST=<%= @project_name %>.docker
+      - VIRTUAL_PORT=80
     depends_on:
 <%= compose_depends %>
+
+<% if options[:delayed_job] %>
+  worker:
+    extends: app
+    command: ./bin/delayed_job run
+<%= compose_depends %>
+<% end %>
+
+<% if options[:sidekiq] %>
+  worker:
+    extends: app
+    command: bundle exec sidekiq
+<%= compose_depends %>
+<% end %>
 
 volumes:
 <% if options[:postgres] -%>

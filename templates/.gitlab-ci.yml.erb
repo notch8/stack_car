@@ -1,4 +1,4 @@
-image: $CI_REGISTRY_IMAGE/builder:latest
+image: <%= options[:build_image] %>
 services:
   - docker:dind
 <% if options[:postgres] -%>

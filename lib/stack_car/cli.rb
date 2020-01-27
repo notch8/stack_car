@@ -23,17 +23,17 @@ module StackCar
       args = ['--remove-orphans']
       args << '--build' if options[:build]
       if options[:build]
-        run("docker-compose pull #{options[:service]}")
+        run("#{dotenv} docker-compose pull #{options[:service]}")
       end
 
-      run_with_exit("docker-compose up #{args.join(' ')} #{options[:service]}")
+      run_with_exit("#{dotenv} docker-compose up #{args.join(' ')} #{options[:service]}")
     end
 
     method_option :service, default: '', type: :string, aliases: '-s'
     desc "stop", "stops the specified running service, defaults to all"
     def stop
       ensure_development_env
-      run("docker-compose stop #{options[:service]}")
+      run("#{dotenv} docker-compose stop #{options[:service]}")
       run_with_exit("rm -rf tmp/pids/*")
     end
     map down: :stop
@@ -42,64 +42,64 @@ module StackCar
     desc "build", "builds specified service, defaults to web"
     def build
       ensure_development_env
-      run_with_exit("docker-compose build #{options[:service]}")
+      run_with_exit("#{dotenv} docker-compose build #{options[:service]}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "push ARGS", "wraps docker-compose push web unless --service is used to specify"
     def push(*args)
-      run_with_exit("docker-compose push #{options[:service]} #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker-compose push #{options[:service]} #{args.join(' ')}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "pull ARGS", "wraps docker-compose pull web unless --service is used to specify"
     def pull(*args)
-      run_with_exit("docker-compose pull #{options[:service]} #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker-compose pull #{options[:service]} #{args.join(' ')}")
     end
 
     method_option :service, default: '', type: :string, aliases: '-s'
     desc "ps ARGS", "wraps docker-compose pull web unless --service is used to specify"
     def ps(*args)
-      run_with_exit("docker-compose ps #{options[:service]} #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker-compose ps #{options[:service]} #{args.join(' ')}")
     end
     map status: :ps
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "bundle ARGS", "wraps docker-compose run web unless --service is used to specify"
     def bundle(*args)
-      run_with_exit("docker-compose exec #{options[:service]} bundle")
+      run_with_exit("#{dotenv} docker-compose exec #{options[:service]} bundle")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "walk ARGS", "wraps docker-compose run web unless --service is used to specify"
     def walk(*args)
-      run_with_exit("docker-compose run #{options[:service]} #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker-compose run #{options[:service]} #{args.join(' ')}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "exec ARGS", "wraps docker-compose exec web unless --service is used to specify"
     def exec(*args)
-      run_with_exit("docker-compose exec #{options[:service]} #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker-compose exec #{options[:service]} #{args.join(' ')}")
     end
     map ex: :exec
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc 'sh ARGS', "launch a shell using docker-compose exec, sets tty properly"
     def sh(*args)
-      run_with_exit("docker-compose exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput lines\`\" #{options[:service]} bash #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker-compose exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput lines\`\" #{options[:service]} bash #{args.join(' ')}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "bundle_exec ARGS", "wraps docker-compose exec web bundle exec unless --service is used to specify"
     def bundle_exec(*args)
-      run_with_exit("docker-compose exec #{options[:service]} bundle exec #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker-compose exec #{options[:service]} bundle exec #{args.join(' ')}")
     end
     map be: :bundle_exec
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "console ARGS", "shortcut to start rails console"
     def console(*args)
-      run_with_exit("docker-compose exec #{options[:service]} bundle exec rails console #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker-compose exec #{options[:service]} bundle exec rails console #{args.join(' ')}")
     end
     map rc: :console
 
@@ -110,22 +110,22 @@ module StackCar
       registry = "#{ENV['REGISTRY_HOST']}#{ENV['REGISTRY_URI']}"
       tag = ENV["TAG"] || 'latest'
       unless File.exists?("#{ENV['HOME']}/.docker/config.json") && File.readlines("#{ENV['HOME']}/.docker/config.json").grep(/#{ENV['REGISTRY_HOST']}/).size > 0
-        run_with_exit("docker login #{ENV['REGISTRY_HOST']}")
+        run_with_exit("#{dotenv(environment)} docker login #{ENV['REGISTRY_HOST']}")
       end
-      run_with_exit("docker tag #{registry}:#{tag} #{registry}:#{environment}-#{timestamp}")
-      run_with_exit("docker push #{registry}:#{environment}-#{timestamp}")
-      run_with_exit("docker tag #{registry}:#{tag} #{registry}:#{sha}")
-      run_with_exit("docker push #{registry}:#{sha}")
-      run_with_exit("docker tag #{registry}:#{tag} #{registry}:#{environment}-latest")
-      run_with_exit("docker push #{registry}:#{environment}-latest")
-      run_with_exit("docker tag #{registry}:#{tag} #{registry}:latest")
-      run_with_exit("docker push #{registry}:latest")
+      run_with_exit("#{dotenv(environment)} docker tag #{registry}:#{tag} #{registry}:#{environment}-#{timestamp}")
+      run_with_exit("#{dotenv(environment)} docker push #{registry}:#{environment}-#{timestamp}")
+      run_with_exit("#{dotenv(environment)} docker tag #{registry}:#{tag} #{registry}:#{sha}")
+      run_with_exit("#{dotenv(environment)} docker push #{registry}:#{sha}")
+      run_with_exit("#{dotenv(environment)} docker tag #{registry}:#{tag} #{registry}:#{environment}-latest")
+      run_with_exit("#{dotenv(environment)} docker push #{registry}:#{environment}-latest")
+      run_with_exit("#{dotenv(environment)} docker tag #{registry}:#{tag} #{registry}:latest")
+      run_with_exit("#{dotenv(environment)} docker push #{registry}:latest")
     end
 
     desc "provision ENVIRONMENT", "configure the servers for docker and then deploy an image"
     def provision(environment)
       # TODO make dotenv load a specific environment?
-      run_with_exit("DEPLOY_ENV=#{environment} dotenv ansible-playbook -i ops/hosts -l #{environment}:localhost ops/provision.yml")
+      run_with_exit("DEPLOY_ENV=#{environment} #{dotenv(environment)} ansible-playbook -i ops/hosts -l #{environment}:localhost ops/provision.yml")
     end
 
     desc "ssh ENVIRONMENT", "log in to a running instance - requires PRODUCTION_SSH to be set"
@@ -140,22 +140,25 @@ module StackCar
 
     desc "deploy ENVIRONMENT", "deploy an image from the registry"
     def deploy(environment)
-      run_with_exit("DEPLOY_HOOK=$DEPLOY_HOOK_#{environment.upcase} dotenv ansible-playbook -i ops/hosts -l #{environment}:localhost ops/deploy.yml")
+      run_with_exit("DEPLOY_HOOK=$DEPLOY_HOOK_#{environment.upcase} #{dotenv(environment)} ansible-playbook -i ops/hosts -l #{environment}:localhost ops/deploy.yml")
     end
 
-    method_option :elasticsearch, default: false, type: :boolean, aliases: '-e'
-    method_option :solr, default: false, type: :boolean, aliases: '-s'
-    method_option :postgres, default: false, type: :boolean, aliases: '-p'
-    method_option :mysql, default: false, type: :boolean, aliases: '-m'
-    method_option :redis, default: false, type: :boolean, aliases: '-r'
     method_option :delayed_job, default: false, type: :boolean, aliases: '-j'
-    method_option :fcrepo, default: false, type: :boolean, aliases: '-f'
     method_option :deploy, default: false, type: :boolean, aliases: '-d'
+    method_option :elasticsearch, default: false, type: :boolean, aliases: '-e'
+    method_option :fcrepo, default: false, type: :boolean, aliases: '-f'
+    method_option :helm, default: false, type: :boolean, aliases: '-h'
+    method_option :git, default: true, type: :boolean, aliases: '-g'
     method_option :heroku, default: false, type: :boolean, aliases: '-h'
-    method_option :rancher, default: false, type: :boolean, aliases: '-dr'
-    method_option :sidekiq, default: false, type: :boolean, aliases: '-sq' # TODO
-    method_option :mongodb, default: false, type: :boolean, aliases: '-mg'
+    method_option :imagemagick, default: false, type: :boolean, aliases: '-i'
     method_option :memcached, default: false, type: :boolean, aliases: '-mc'
+    method_option :mongodb, default: false, type: :boolean, aliases: '-mg'
+    method_option :mysql, default: false, type: :boolean, aliases: '-m'
+    method_option :postgres, default: false, type: :boolean, aliases: '-p'
+    method_option :rancher, default: false, type: :boolean, aliases: '-dr'
+    method_option :redis, default: false, type: :boolean, aliases: '-r'
+    method_option :sidekiq, default: false, type: :boolean, aliases: '-sq' # TODO
+    method_option :solr, default: false, type: :boolean, aliases: '-s'
     method_option :yarn, default: false, type: :boolean, aliases: '-y'
     desc 'dockerize DIR', 'Will copy the docker tempates in to your project, see options for supported dependencies'
     long_desc <<-DOCKERIZE
@@ -166,11 +169,16 @@ module StackCar
     DOCKERIZE
     def dockerize(dir=".")
       Dir.chdir(dir)
+      # Commandline overrides config files
+      options = file_config.merge(options)
       @project_name = File.basename(File.expand_path(dir))
       apt_packages << "libpq-dev postgresql-client" if options[:postgres]
       apt_packages << "mysql-client" if options[:mysql]
+      apt_packages << "imagemagick" if options[:imagemagick]
       pre_apt << "echo 'Downloading Packages'"
       post_apt << "echo 'Packages Downloaded'"
+
+      options[:build_image] = "#{@project_name}/builder:latest" if options[:build_image].blank?
 
       if options[:yarn]
         apt_packages << 'yarn'
@@ -188,7 +196,7 @@ module StackCar
         post_apt << "cd /opt && unzip fits-1.0.5.zip && chmod +X fits-1.0.5/fits.sh"
       end
 
-     ['.dockerignore', 'Dockerfile', 'Dockerfile.base', 'docker-compose.yml', 'docker-compose.ci.yml', 'docker-compose.production.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
+     ['.dockerignore', 'Dockerfile', 'Dockerfile.base', 'docker-compose.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
        puts template_file
         template("#{template_file}.erb", template_file)
      end
@@ -267,11 +275,34 @@ module StackCar
       end
     end
 
+    def file_config
+      path = find_config(Dir.pwd)
+      if path
+        JSON.parse(File.read(path))
+      else
+        {}
+      end
+    end
+
+    def find_config(dir)
+      path = File.join(dir, '.stackcar_rc')
+      if File.exists?(path)
+        return path
+      elsif dir == "/"
+        return nil
+      else
+        return find_config(File.dirname(dir))
+      end
+    end
+
     def ensure_development_env
       if !File.exists?('.env.development')
         template(".env.development.erb", ".env.development")
       end
     end
 
+    def dotenv(environment='development')
+      "dotenv -f .env.#{environment},.env"
+    end
   end
 end

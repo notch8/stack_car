@@ -1,14 +1,33 @@
 FROM CHANGEME/base:latest
+<% if options[:git] %>
+ARG BRANCH=master
+ARG REPO_URL
+<% end %>
 
-ADD http://time.jsontest.com build-time
+ADD http://timejson.herokuapp.com build-time
 ADD ops/webapp.conf /etc/nginx/sites-enabled/webapp.conf
 ADD ops/env.conf /etc/nginx/main.d/env.conf
-ADD . $APP_HOME
 
-RUN cd /home/app/webapp && \
-    (/sbin/setuser app bundle check || /sbin/setuser app bundle install) && \
-    /sbin/setuser app bundle exec rake assets:precompile DB_ADAPTER=nulldb && \
-    chown -R app $APP_HOME && \
-    rm -f /etc/service/nginx/down
+<% if options[:git] %>
+RUN /sbin/setuser app bash -l -c "set -x && \
+  git fetch -ap && \
+  git reset --hard && \
+  git checkout $BRANCH && \
+  git pull && \
+  (bundle check || bundle install) && \
+  bundle exec rake assets:clobber assets:precompile DB_ADAPTER=nulldb && \
+  mv /home/app/webapp/public/assets /home/app/webapp/public/assets-new && \
+  mv /home/app/webapp/public/packs /home/app/webapp/public/packs-new"
+<% else %>
+COPY --chown=app . $APP_HOME
+RUN /sbin/setuser app bash -l -c "set -x && \
+  (bundle check || bundle install) && \
+  bundle exec rake assets:clobber assets:precompile DB_ADAPTER=nulldb && \
+  mv /home/app/webapp/public/assets /home/app/webapp/public/assets-new && \
+  mv /home/app/webapp/public/packs /home/app/webapp/public/packs-new"
+<% end %>
+
+RUN bash -l -c "set -x && \
+  rm -f /etc/service/nginx/down"
 
 CMD ["/sbin/my_init"]
