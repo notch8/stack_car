@@ -27,7 +27,33 @@ postgresql:
   persistence:
     enabled: true
     size: 1Gi
+<% if options[:mysql] %>
+externalDatabase:
+  host: host_name
+  user: <%= @project_name %> 
+  password: 05cb2c6a26ce76
+  database: <%= @project_name %> 
+  port: '3306'
 
+mariadb:
+  enabled: false
+  replication:
+    enabled: false
+  db:
+    name: <%= @project_name %>
+    user: <%= @project_name %>
+    ## If the password is not specified, mariadb will generates a random password
+    # password:
+  # rootUser:
+  #   password:
+  master:
+    persistence:
+      enabled: true
+      # storageClass: "-"
+      accessMode: ReadWriteOnce
+      size: 8Gi
+<% end %>
+<% if options[:redis] %>
 redis:
   enabled: true
   usePassword: false
@@ -44,24 +70,25 @@ redis:
     persistence:
       enabled: true
       size: 1Gi
-
+<% end %>
+<% if options[:fcrepo] %>
 fcrepo:
   image:
     repository: ualbertalib/docker-fcrepo4
     tag: 4.7
   storage:
     size: 1Gi
-
+<% end %>
 web:
   replicas: 2
-
+<% if options[:sidekiq] %>
 sidekiq:
   replicas: 1
   timeout: 3600
-
+<% end %>
 rails:
   image:
-    repository: hyku/main
+    repository: <%= @project_name %> 
     tag: latest
   # If using a private registry setup access via secrets
   # imagePullSecrets:
@@ -72,29 +99,19 @@ rails:
       className: nfs
 
 ingress:
-  tlsSecretName: demoapp-puma-tls
+  tlsSecretName: <%= @project_name %>_tls 
   
   # helm upgrade release-name . --set ingress.localhost
-  host: hyku.docker
-
-# Used for naming k8s resources (eg. staging-hyku-web) 
-nameOverride:
-  hyku
+  host: <%= @project_name %>.docker
 
 env:
   configmap:
-    NAME: hyku
+    NAME: <%= @project_name %>
     DATABASE_ADAPTER: postgresql
     DATABASE_USER: postgres
+    <% if options[:fcrepo] %>
     FC_DATABASE_NAME: fcrepo
-    DATABASE_NAME: hyku
-    IN_DOCKER: "true"
     LD_LIBRARY_PATH: /opt/fits-latest/tools/mediainfo/linux
-    PASSENGER_APP_ENV: production
-    RAILS_CACHE_STORE_URL: memcache
-    RAILS_ENV: production
-    RAILS_LOG_TO_STDOUT: true
-    RAILS_SERVE_STATIC_FILES: true
     SETTINGS__ACTIVE_JOB__QUEUE_ADAPTER: sidekiq
     SETTINGS__CONTACT_EMAIL: admin@example.org
     SETTINGS__DEVISE__INVITATION_FROM_EMAIL: admin@example.org
@@ -103,10 +120,14 @@ env:
     SETTINGS__MULTITENANCY__ADMIN_ONLY_TENANT_CREATION: true
     SETTINGS__MULTITENANCY__DEFAULT_HOST: "%{tenant}.hyku.docker"
     SETTINGS__MULTITENANCY__ENABLED: true
+    <% end %>
+    DATABASE_NAME: <%= @project_name %>
+    IN_DOCKER: "true"
+    PASSENGER_APP_ENV: production
+    RAILS_ENV: production
+    RAILS_LOG_TO_STDOUT: true
+    RAILS_SERVE_STATIC_FILES: true
 
   secret:
-    # GOOGLE_FONTS_KEY: 
     SECRET_KEY_BASE: secretabc
-    # SMTP_PASSWORD: 
-    # SMTP_USERNAME: 
     DATABASE_PASSWORD: passwordabc

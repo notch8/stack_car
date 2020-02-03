@@ -179,8 +179,6 @@ module StackCar
       pre_apt << "echo 'Downloading Packages'"
       post_apt << "echo 'Packages Downloaded'"
 
-#      options[:build_image] = "#{@project_name}/builder:latest" if !options[:build_image]
-
       if options[:yarn]
         apt_packages << 'yarn'
         pre_apt << "curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -"
@@ -224,7 +222,13 @@ module StackCar
         say 'Please update ops/hosts with the correct server addresses'
       elsif options[:helm]
         directory('chart')
-      else
+        if options[:fcrepo]
+          directory('chart-fcrepo', 'chart/templates')
+        end
+        if options[:sidekiq]
+          directory('chart-sidekiq', 'chart/templates')
+        end
+     else
         empty_directory('ops')
       end
 
