@@ -2,7 +2,7 @@ version: '2.1'
 services:
 <% if options[:postgres] -%>
   postgres:
-    image: postgres
+    image: postgres:11.1
     env_file:
       - .env
       - .env.development
@@ -13,7 +13,7 @@ services:
 <% end -%>
 <% if options[:mysql] -%>
   mysql:
-    image: mysql
+    image: mysql:5.7
     env_file:
       - .env
       - .env.development
