@@ -9,7 +9,7 @@ RUN <%= pre_apt_string %> && \
     apt-get update -qq && \
     apt-get install -y \
       build-essential \
-      libsasl2-dev
+      libsasl2-dev \
       nodejs \
       pv \
       tzdata \
@@ -34,12 +34,12 @@ WORKDIR $APP_HOME
 
 <% if options[:git] %>
 RUN /sbin/setuser app bash -l -c " \
-echo '${DEPLOY_KEY}' | base64 -d > /home/app/.ssh/id_rsa && \
-chown app /home/app/.ssh/id_rsa && \
-chmod 600 /home/app/.ssh/id_rsa && \
-ssh-keyscan gitlab.com >> /home/app/.ssh/known_hosts && \
-ssh-keyscan bitbucket.org >> /home/app/.ssh/known_hosts && \
-ssh-keyscan github.com > /home/app/.ssh/known_hosts
+  echo '${DEPLOY_KEY}' | base64 -d > /home/app/.ssh/id_rsa && \
+  chown app /home/app/.ssh/id_rsa && \
+  chmod 600 /home/app/.ssh/id_rsa && \
+  ssh-keyscan gitlab.com >> /home/app/.ssh/known_hosts && \
+  ssh-keyscan bitbucket.org >> /home/app/.ssh/known_hosts && \
+  ssh-keyscan github.com > /home/app/.ssh/known_hosts"
 <% end %>
 
 ENV BUNDLE_GEMFILE=$APP_HOME/Gemfile \
@@ -49,7 +49,7 @@ COPY --chown=app Gemfile* $APP_HOME/
 RUN /sbin/setuser app bash -l -c "bundle check || bundle install"
 
 <% if options[:git] %>
-RUN git clone -–depth 2 ${REPO_URL} /home/app/webapp"
+  RUN /sbin/setuser app bash -l -c "git clone -–depth 2 ${REPO_URL} /home/app/webapp"
 <% else %>
 COPY --chown=app . $APP_HOME
 <% end %>

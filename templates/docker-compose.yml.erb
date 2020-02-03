@@ -102,20 +102,23 @@ services:
       args:
         DEPLOY_KEY: "${DEPLOY_KEY}"
         APP_NAME: "${APP_NAME}"
+        REPO_URL: "${REPO_URL}"
     env_file:
       - .env
       - .env.development
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DEPLOY_KEY: "${DEPLOY_KEY}"
+        REPO_URL: "${REPO_URL}"
+        BRANCH: "${BRANCH}"
     image: "${REGISTRY_HOST}${REGISTRY_URI}:${TAG:-master}"
     env_file:
       - .env
       - .env.development
-    args:
-      DEPLOY_KEY: "${DEPLOY_KEY}"
-      REPO_URL: "${REPO_URL}"
-      BRANCH: "${BRANCH}"
     volumes:
       - .:/home/app/webapp
     # Keep the stdin open, so we can attach to our app container's process
