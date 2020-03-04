@@ -32,24 +32,14 @@ ENV APP_HOME /home/app/webapp
 RUN mkdir $APP_HOME
 WORKDIR $APP_HOME
 
-<% if options[:git] %>
-RUN /sbin/setuser app bash -l -c " \
-  echo '${DEPLOY_KEY}' | base64 -d > /home/app/.ssh/id_rsa && \
-  chown app /home/app/.ssh/id_rsa && \
-  chmod 600 /home/app/.ssh/id_rsa && \
-  ssh-keyscan gitlab.com >> /home/app/.ssh/known_hosts && \
-  ssh-keyscan bitbucket.org >> /home/app/.ssh/known_hosts && \
-  ssh-keyscan github.com > /home/app/.ssh/known_hosts"
-<% end %>
-
 ENV BUNDLE_GEMFILE=$APP_HOME/Gemfile \
   BUNDLE_JOBS=4
 
 COPY --chown=app Gemfile* $APP_HOME/
-RUN /sbin/setuser app bash -l -c "bundle check || bundle install"
+RUN /sbin/setuser app bash -l -c "gem update bundler && (bundle check || bundle install)"
 
 <% if options[:git] %>
-  RUN /sbin/setuser app bash -l -c "git clone -–depth 2 ${REPO_URL} /home/app/webapp"
+RUN chown -R app $APP_HOME && /sbin/setuser app bash -l -c "git clone --depth 2 ${REPO_URL} ${APP_HOME}""
 <% else %>
 COPY --chown=app . $APP_HOME
 <% end %>
