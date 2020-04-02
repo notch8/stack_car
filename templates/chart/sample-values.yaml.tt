@@ -1,5 +1,6 @@
 # Customize the following values as needed
 
+<% if options[:solr] %>
 solr:
   image:
    repository: solr
@@ -14,6 +15,7 @@ zookeeper:
     enabled: true
     accessMode: ReadWriteOnce
     size: 1Gi
+<% end %>
 
 postgresql:
   enabled: true
