@@ -1,0 +1,133 @@
+# Customize the following values as needed
+
+solr:
+  image:
+   repository: solr
+   tag: 7.4
+  replicaCount: 1
+  volumeClaimTemplates:
+    storageSize: 1Gi
+
+zookeeper:
+  replicaCount: 1
+  persistence:
+    enabled: true
+    accessMode: ReadWriteOnce
+    size: 1Gi
+
+postgresql:
+  enabled: true
+  # Use fcrepo; the web app can create it's own db with db:create
+  postgresqlDatabase: fcrepo
+  postgresqlUsername: postgres
+  # Only used when internal PG is disabled
+  # postgresqlHost: postgres
+  postgresqlPassword: passwordabc
+  # postgresqlPort: 5432
+  persistence:
+    enabled: true
+    size: 1Gi
+<% if options[:mysql] %>
+externalDatabase:
+  host: host_name
+  user: <%= @project_name %> 
+  password: 05cb2c6a26ce76
+  database: <%= @project_name %> 
+  port: '3306'
+
+mariadb:
+  enabled: false
+  replication:
+    enabled: false
+  db:
+    name: <%= @project_name %>
+    user: <%= @project_name %>
+    ## If the password is not specified, mariadb will generates a random password
+    # password:
+  # rootUser:
+  #   password:
+  master:
+    persistence:
+      enabled: true
+      # storageClass: "-"
+      accessMode: ReadWriteOnce
+      size: 8Gi
+<% end %>
+<% if options[:redis] %>
+redis:
+  enabled: true
+  usePassword: false
+  # Only used when internal redis is disabled
+  # host: redis
+  # Just omit the password field if your redis cluster doesn't use password
+  # password: redis
+  # port: 6379
+  master:
+    persistence:
+      enabled: true
+      size: 1Gi
+  slave:
+    persistence:
+      enabled: true
+      size: 1Gi
+<% end %>
+<% if options[:fcrepo] %>
+fcrepo:
+  image:
+    repository: ualbertalib/docker-fcrepo4
+    tag: 4.7
+  storage:
+    size: 1Gi
+<% end %>
+web:
+  replicas: 2
+<% if options[:sidekiq] %>
+sidekiq:
+  replicas: 1
+  timeout: 3600
+<% end %>
+rails:
+  image:
+    repository: <%= @project_name %> 
+    tag: latest
+  # If using a private registry setup access via secrets
+  # imagePullSecrets:
+  #   - name: gitlab
+  shared:
+    storage:
+      size: 1Gi
+      className: nfs
+
+ingress:
+  tlsSecretName: <%= @project_name %>_tls 
+  
+  # helm upgrade release-name . --set ingress.localhost
+  host: <%= @project_name %>.docker
+
+env:
+  configmap:
+    NAME: <%= @project_name %>
+    DATABASE_ADAPTER: postgresql
+    DATABASE_USER: postgres
+    <% if options[:fcrepo] %>
+    FC_DATABASE_NAME: fcrepo
+    LD_LIBRARY_PATH: /opt/fits-latest/tools/mediainfo/linux
+    SETTINGS__ACTIVE_JOB__QUEUE_ADAPTER: sidekiq
+    SETTINGS__CONTACT_EMAIL: admin@example.org
+    SETTINGS__DEVISE__INVITATION_FROM_EMAIL: admin@example.org
+    SETTINGS__FITS_PATH: /opt/fits/fits.sh
+    SETTINGS__MULTITENANCY__ADMIN_HOST: hyku.docker
+    SETTINGS__MULTITENANCY__ADMIN_ONLY_TENANT_CREATION: true
+    SETTINGS__MULTITENANCY__DEFAULT_HOST: "%{tenant}.hyku.docker"
+    SETTINGS__MULTITENANCY__ENABLED: true
+    <% end %>
+    DATABASE_NAME: <%= @project_name %>
+    IN_DOCKER: "true"
+    PASSENGER_APP_ENV: production
+    RAILS_ENV: production
+    RAILS_LOG_TO_STDOUT: true
+    RAILS_SERVE_STATIC_FILES: true
+
+  secret:
+    SECRET_KEY_BASE: secretabc
+    DATABASE_PASSWORD: passwordabc
