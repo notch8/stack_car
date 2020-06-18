@@ -2,10 +2,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "hyku.fcrepo.name" . }}
+  name: {{ template "app.fcrepo.name" . }}
   labels:
-    app: {{ template "hyku.name" . }}
-    chart: {{ template "hyku.chart" . }}
+    app: {{ template "app.name" . }}
+    chart: {{ template "app.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     component: fcrepo
@@ -13,7 +13,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ template "hyku.name" . }}
+      app: {{ template "app.name" . }}
       release: {{ .Release.Name }}
       component: fcrepo
   strategy:
@@ -21,7 +21,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "hyku.name" . }}
+        app: {{ template "app.name" . }}
         release: {{ .Release.Name }}
         component: fcrepo
     spec:
@@ -33,7 +33,7 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: {{ template "hyku.fcrepo.name" . }}
+            claimName: {{ template "app.fcrepo.name" . }}
       initContainers:
         - name: "remove-lost-found"
           image: "busybox:1.25.0"
@@ -58,6 +58,6 @@ spec:
               mountPath: /data
           envFrom:
             - configMapRef:
-                name: {{ template "hyku.fcrepo-env.name" . }}
+                name: {{ template "app.fcrepo-env.name" . }}
             - secretRef:
-                name: {{ template "hyku.fcrepo-env.name" . }}
+                name: {{ template "app.fcrepo-env.name" . }}

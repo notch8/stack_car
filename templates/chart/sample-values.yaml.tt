@@ -118,9 +118,9 @@ env:
     SETTINGS__CONTACT_EMAIL: admin@example.org
     SETTINGS__DEVISE__INVITATION_FROM_EMAIL: admin@example.org
     SETTINGS__FITS_PATH: /opt/fits/fits.sh
-    SETTINGS__MULTITENANCY__ADMIN_HOST: hyku.docker
+    SETTINGS__MULTITENANCY__ADMIN_HOST: app.docker
     SETTINGS__MULTITENANCY__ADMIN_ONLY_TENANT_CREATION: true
-    SETTINGS__MULTITENANCY__DEFAULT_HOST: "%{tenant}.hyku.docker"
+    SETTINGS__MULTITENANCY__DEFAULT_HOST: "%{tenant}.app.docker"
     SETTINGS__MULTITENANCY__ENABLED: true
     <% end %>
     DATABASE_NAME: <%= @project_name %>

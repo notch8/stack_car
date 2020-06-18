@@ -2,10 +2,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "hyku.web.name" . }}
+  name: {{ template "app.web.name" . }}
   labels:
-    app: {{ template "hyku.name" . }}
-    chart: {{ template "hyku.chart" . }}
+    app: {{ template "app.name" . }}
+    chart: {{ template "app.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     component: web
@@ -13,13 +13,13 @@ spec:
   replicas: {{ .Values.web.replicas }}
   selector:
     matchLabels:
-      app: {{ template "hyku.name" . }}
+      app: {{ template "app.name" . }}
       release: {{ .Release.Name }}
       component: web
   template:
     metadata:
       labels:
-        app: {{ template "hyku.name" . }}
+        app: {{ template "app.name" . }}
         release: {{ .Release.Name }}
         component: web
       annotations:
@@ -34,7 +34,7 @@ spec:
       volumes:
         - name: shared
           persistentVolumeClaim:
-            claimName: {{ template "hyku.rails-env.name" . }}-shared
+            claimName: {{ template "app.rails-env.name" . }}-shared
       containers:
         - name: web
           image: {{ .Values.rails.image.repository }}:{{ .Values.rails.image.tag }}
@@ -62,6 +62,6 @@ spec:
             periodSeconds: 120
           envFrom:
             - configMapRef:
-                name: {{ template "hyku.rails-env.name" . }}
+                name: {{ template "app.rails-env.name" . }}
             - secretRef:
-                name: {{ template "hyku.rails-env.name" . }}
+                name: {{ template "app.rails-env.name" . }}

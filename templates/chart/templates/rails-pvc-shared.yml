@@ -2,10 +2,10 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: {{ template "hyku.rails-env.name" . }}-shared
+  name: {{ template "app.rails-env.name" . }}-shared
   labels:
-    app: {{ template "hyku.name" . }}
-    chart: {{ template "hyku.chart" . }}
+    app: {{ template "app.name" . }}
+    chart: {{ template "app.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     component: rails

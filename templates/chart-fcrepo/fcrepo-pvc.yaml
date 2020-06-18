@@ -2,10 +2,10 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: {{ template "hyku.fcrepo.name" . }}
+  name: {{ template "app.fcrepo.name" . }}
   labels:
-    app: {{ template "hyku.name" . }}
-    chart: {{ template "hyku.chart" . }}
+    app: {{ template "app.name" . }}
+    chart: {{ template "app.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     component: fcrepo

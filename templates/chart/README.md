@@ -1,7 +1,7 @@
 Helm Chart
 ==========
 
-This is a Hyku Helm Chart which can be used to deploy a Hyku instance to a Kubernetes cluster.
+This is a Rails Helm Chart which can be used to deploy a Rails instance to a Kubernetes cluster.
 
 # Requirements
 
@@ -40,7 +40,7 @@ For GitLab, create a Personal Access Token in GitLab with read access.
 
 Create your secret (called gitlab) in kubectl, substituting the items in {} with your data:
 ```
-create secret docker-registry gitlab --docker-server=https://registry.gitlab.com --docker-username={YOUR USERNAME} --docker-password={PERSONAL ACCESS TOKEN} --docker-email={YOUR EMAIL} --namespace {NAMESPACE eg. hyku}
+create secret docker-registry gitlab --docker-server=https://registry.gitlab.com --docker-username={YOUR USERNAME} --docker-password={PERSONAL ACCESS TOKEN} --docker-email={YOUR EMAIL} --namespace {NAMESPACE eg. hyku-staging}
 ```
 
 Reference the secret in `imagePullSecrets`, see the sample.yamnl file for an example.
@@ -129,7 +129,7 @@ open locaallhost
 ## Cleanup
 helm uninstall development --namespace REPO_NAME
 
-eg. `helm uninstall development --namespace hyku`
+eg. `helm uninstall development --namespace project-env`
 
 Tip: add the --dry-run to see what will be deleted
 
@@ -197,7 +197,7 @@ bin/deploy staging latest
 
 NOTE: the TAG will be used to pull the latest image from the GitLab repository. If the code has changed, make sure it's been pushed and the tagged image in the repository updated.
 
-The namespace will be set to the git repository name, eg. hyku. Make sure the namespace exists in your cluster. Create it with `kubectl create namespace hyku`
+The namespace will be set to the git repository name, eg. project-env. Make sure the namespace exists in your cluster. Create it with `kubectl create namespace project-env`
 
 # Troubleshooting
 

@@ -2,10 +2,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "hyku.setup.name" . }}
+  name: {{ template "app.setup.name" . }}
   labels:
-    app: {{ template "hyku.name" . }}
-    chart: {{ template "hyku.chart" . }}
+    app: {{ template "app.name" . }}
+    chart: {{ template "app.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
@@ -13,7 +13,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "hyku.name" . }}
+        app: {{ template "app.name" . }}
         release: {{ .Release.Name }}
     spec:
       restartPolicy: Never
@@ -24,7 +24,7 @@ spec:
       volumes:
         - name: shared
           persistentVolumeClaim:
-            claimName: {{ template "hyku.rails-env.name" . }}-shared
+            claimName: {{ template "app.rails-env.name" . }}-shared
       initContainers:
         - name: check-solr-ready
           image: {{ .Values.rails.image.repository }}:{{ .Values.rails.image.tag }}
@@ -35,7 +35,7 @@ spec:
             - "response=0 && until [ $response == 200 ]; do response=$(curl --write-out %{http_code} --silent --output /dev/null $(echo $SETTINGS__SOLR__URL)admin/collections?action=LIST); echo Response is $response; sleep 5; done;"
           envFrom:
             - configMapRef:
-                name: {{ template "hyku.rails-env.name" . }}
+                name: {{ template "app.rails-env.name" . }}
       containers:
         - name: setup
           image: {{ .Values.rails.image.repository }}:{{ .Values.rails.image.tag }}
@@ -50,6 +50,6 @@ spec:
             - "(bundle check || bundle install) && bundle exec rails db:create && bundle exec rake zookeeper:upload && bundle exec rails db:migrate db:seed && echo SETUP COMPLETE"
           envFrom:
             - configMapRef:
-                name: {{ template "hyku.rails-env.name" . }}
+                name: {{ template "app.rails-env.name" . }}
             - secretRef:
-                name: {{ template "hyku.rails-env.name" . }}
+                name: {{ template "app.rails-env.name" . }}

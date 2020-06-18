@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "hyku.name" -}}
+{{- define "app.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "hyku.fullname" -}}
+{{- define "app.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -27,7 +27,7 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "hyku.chart" -}}
+{{- define "app.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -35,44 +35,44 @@ Create chart name and version as used by the chart label.
 Shorthand for component names
 */}}
 
-{{- define "hyku.postgres.name" -}}
+{{- define "app.postgres.name" -}}
 {{- .Release.Name -}}-postgresql
 {{- end -}}
-{{- define "hyku.redis.name" -}}
+{{- define "app.redis.name" -}}
 {{- .Release.Name -}}-redis-master
 {{- end -}}
-{{- define "hyku.web.name" -}}
-{{- include "hyku.fullname" . -}}-web
+{{- define "app.web.name" -}}
+{{- include "app.fullname" . -}}-web
 {{- end -}}
-{{- define "hyku.sidekiq.name" -}}
-{{- include "hyku.fullname" . -}}-sidekiq
+{{- define "app.sidekiq.name" -}}
+{{- include "app.fullname" . -}}-sidekiq
 {{- end -}}
-{{- define "hyku.rails-env.name" -}}
-{{- include "hyku.fullname" . -}}-rails-env
+{{- define "app.rails-env.name" -}}
+{{- include "app.fullname" . -}}-rails-env
 {{- end -}}
-{{- define "hyku.postgres-env.name" -}}
-{{- include "hyku.fullname" . -}}-postgres-env
+{{- define "app.postgres-env.name" -}}
+{{- include "app.fullname" . -}}-postgres-env
 {{- end -}}
-{{- define "hyku.setup.name" -}}
-{{- include "hyku.fullname" . -}}-setup
+{{- define "app.setup.name" -}}
+{{- include "app.fullname" . -}}-setup
 {{- end -}}
-{{- define "hyku.zookeeper.name" -}}
+{{- define "app.zookeeper.name" -}}
 {{- include "solr.zookeeper-service-name" . -}}
 {{- end -}}
-{{- define "hyku.zookeeper-env.name" -}}
-{{- include "hyku.fullname" . -}}-zookeeper-env
+{{- define "app.zookeeper-env.name" -}}
+{{- include "app.fullname" . -}}-zookeeper-env
 {{- end -}}
-{{- define "hyku.solr.name" -}}
+{{- define "app.solr.name" -}}
 {{- .Release.Name -}}-solr-svc
 {{- end -}}
 
-{{- define "hyku.solr.collection" -}}
+{{- define "app.solr.collection" -}}
 {{- if eq .Values.env.configmap.SETTINGS__MULTITENANCY__ENABLED false }}single{{- end -}}
 {{- end -}}
 
-{{- define "hyku.fcrepo.name" -}}
-{{- include "hyku.fullname" . -}}-fcrepo
+{{- define "app.fcrepo.name" -}}
+{{- include "app.fullname" . -}}-fcrepo
 {{- end -}}
-{{- define "hyku.fcrepo-env.name" -}}
-{{- include "hyku.fullname" . -}}-fcrepo-env
+{{- define "app.fcrepo-env.name" -}}
+{{- include "app.fullname" . -}}-fcrepo-env
 {{- end -}}
