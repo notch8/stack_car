@@ -34,7 +34,6 @@ Create chart name and version as used by the chart label.
 {{/*
 Shorthand for component names
 */}}
-
 <%- if options[:postgres] %>
 {{- define "app.postgres.name" -}}
 {{- .Release.Name -}}-postgresql
@@ -43,19 +42,16 @@ Shorthand for component names
 {{- include "app.fullname" . -}}-postgres-env
 {{- end -}}
 <%- end %>
-
 <%- if options[:redis] %>
 {{- define "app.redis.name" -}}
 {{- .Release.Name -}}-redis-master
 {{- end -}}
 <%- end %>
-
 <%- if options[:sidekiq] %>
 {{- define "app.sidekiq.name" -}}
 {{- include "app.fullname" . -}}-sidekiq
 {{- end -}}
 <%- end %>
-
 {{- define "app.web.name" -}}
 {{- include "app.fullname" . -}}-web
 {{- end -}}
@@ -65,7 +61,6 @@ Shorthand for component names
 {{- define "app.setup.name" -}}
 {{- include "app.fullname" . -}}-setup
 {{- end -}}
-
 <%- if options[:solr] %>
 {{- define "app.zookeeper.name" -}}
 {{- include "solr.zookeeper-service-name" . -}}
@@ -73,16 +68,13 @@ Shorthand for component names
 {{- define "app.zookeeper-env.name" -}}
 {{- include "app.fullname" . -}}-zookeeper-env
 {{- end -}}
-
 {{- define "app.solr.name" -}}
 {{- .Release.Name -}}-solr-svc
 {{- end -}}
-
 {{- define "app.solr.collection" -}}
 {{- if eq .Values.env.configmap.SETTINGS__MULTITENANCY__ENABLED false }}single{{- end -}}
 {{- end -}}
 <%- end %>
-
 <%- if options[:fcrepo] %>
 {{- define "app.fcrepo.name" -}}
 {{- include "app.fullname" . -}}-fcrepo
