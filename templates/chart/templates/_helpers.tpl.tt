@@ -70,11 +70,11 @@ Shorthand for component names
 {{- if eq .Values.env.configmap.SETTINGS__MULTITENANCY__ENABLED false }}single{{- end -}}
 {{- end -}}
 
-{{- if options[:fcrepo] -}}
+<%- if options[:fcrepo] %>
 {{- define "app.fcrepo.name" -}}
 {{- include "app.fullname" . -}}-fcrepo
 {{- end -}}
 {{- define "app.fcrepo-env.name" -}}
 {{- include "app.fullname" . -}}-fcrepo-env
-{{- end -}}
+<%- end %>
 {{- end -}}
