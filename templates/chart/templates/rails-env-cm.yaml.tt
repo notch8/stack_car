@@ -15,9 +15,9 @@ data:
   REDIS_HOST: {{ template "app.redis.name" . }}
   REDIS_URL: redis://{{ template "app.redis.name" . }}:6379/1
 <% end %>
-<% if options[:sidekiq] %>
+<% if options[:sidekiq]  %>
   SIDEKIQ_TIMEOUT: {{ .Values.sidekiq.timeout | quote }}
-<% end %>
+<% end -%>
 <% if options[:solr] %>
   SOLR_URL: http://{{ template "app.solr.name" . }}:8983/solr/
   SETTINGS__SOLR__URL: http://{{ template "app.solr.name" . }}:8983/solr/
