@@ -25,7 +25,7 @@ data:
 <% end %>
 <% if options[:hyku] %>
   {{- if eq .Values.env.configmap.SETTINGS__MULTITENANCY__ENABLED false }}
-  SETTINGS__MULTITENANCY__ROOT_HOST: {{ .Values.ingress.host }}
+    SETTINGS__MULTITENANCY__ROOT_HOST: {{ .Values.ingress.host }}
   {{- end -}}
 <% end %>
 {{- range $key, $value := .Values.env.configmap }}
