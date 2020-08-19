@@ -18,7 +18,7 @@ data:
 <% if options[:sidekiq]  %>
   SIDEKIQ_TIMEOUT: {{ .Values.sidekiq.timeout | quote }}
 <% end -%>
-<% if options[:solr] %>
+<%- if options[:solr] %>
   SOLR_URL: http://{{ template "app.solr.name" . }}:8983/solr/
   SETTINGS__SOLR__URL: http://{{ template "app.solr.name" . }}:8983/solr/
   SETTINGS__ZOOKEEPER__CONNECTION_STR: {{ template "app.zookeeper.name" . }}:2181/configs
