@@ -32,12 +32,12 @@ data:
   <% if options[:hyku] %>
     {{- if eq $.Values.env.configmap.SETTINGS__MULTITENANCY__ENABLED false }}
     {{- if and (ne $key "SETTINGS__MULTITENANCY__ADMIN_HOST") (ne $key "SETTINGS__MULTITENANCY__DEFAULT_HOST") }}
-    {{ $key }}: "{{ $value }}"
+    {{ $key }}: {{ $value | quote }}
     {{- end }}
     {{- else }}
-    {{ $key }}: "{{ $value }}"
+    {{ $key }}: {{ $value | quote }}
     {{- end }}
   <% else %>
-    {{ $key }}: "{{ $value }}"
+    {{ $key }}: {{ $value | quote }}
   <% end %>
 {{- end }}
