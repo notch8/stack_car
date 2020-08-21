@@ -24,18 +24,22 @@ data:
   SETTINGS__ZOOKEEPER__CONNECTION_STR: {{ template "app.zookeeper.name" . }}:2181/configs
 <% end %>
 <% if options[:hyku] %>
-  {{- if eq .Values.env.configmap.SETTINGS__MULTITENANCY__ENABLED false }}
+  {{- if hasKey $.Values.env.configmap "SETTINGS__MULTITENANCY__ENABLED"}}
+  {{- if eq $.Values.env.configmap.SETTINGS__MULTITENANCY__ENABLED false }}
     SETTINGS__MULTITENANCY__ROOT_HOST: {{ .Values.ingress.host }}
+  {{- end -}}
   {{- end -}}
 <% end %>
 {{- range $key, $value := .Values.env.configmap }}
   <% if options[:hyku] %>
+    {{- if hasKey $.Values.env.configmap "SETTINGS__MULTITENANCY__ENABLED"}}
     {{- if eq $.Values.env.configmap.SETTINGS__MULTITENANCY__ENABLED false }}
     {{- if and (ne $key "SETTINGS__MULTITENANCY__ADMIN_HOST") (ne $key "SETTINGS__MULTITENANCY__DEFAULT_HOST") }}
     {{ $key }}: {{ $value | quote }}
     {{- end }}
     {{- else }}
     {{ $key }}: {{ $value | quote }}
+    {{- end }}
     {{- end }}
   <% else %>
     {{ $key }}: {{ $value | quote }}
