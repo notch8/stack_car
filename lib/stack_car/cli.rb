@@ -151,7 +151,7 @@ module StackCar
     method_option :helm, default: false, type: :boolean, aliases: '-h'
     method_option :git, default: true, type: :boolean, aliases: '-g'
     method_option :heroku, default: false, type: :boolean, aliases: '-h'
-    method_option :hyku, default: false, type: :boolean, aliases: '-hk'
+    method_option :hyku, default: false, type: :boolean, aliases: '-u'
     method_option :imagemagick, default: false, type: :boolean, aliases: '-i'
     method_option :memcached, default: false, type: :boolean, aliases: '-mc'
     method_option :mongodb, default: false, type: :boolean, aliases: '-mg'
