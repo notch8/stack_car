@@ -1,6 +1,7 @@
 require 'thor'
 require 'erb'
 require 'dotenv/load'
+require 'json'
 
 module StackCar
   class HammerOfTheGods < Thor
@@ -150,6 +151,7 @@ module StackCar
     method_option :helm, default: false, type: :boolean, aliases: '-h'
     method_option :git, default: true, type: :boolean, aliases: '-g'
     method_option :heroku, default: false, type: :boolean, aliases: '-h'
+    method_option :hyku, default: false, type: :boolean, aliases: '-u'
     method_option :imagemagick, default: false, type: :boolean, aliases: '-i'
     method_option :memcached, default: false, type: :boolean, aliases: '-mc'
     method_option :mongodb, default: false, type: :boolean, aliases: '-mg'
@@ -170,15 +172,13 @@ module StackCar
     def dockerize(dir=".")
       Dir.chdir(dir)
       # Commandline overrides config files
-      options = file_config.merge(options)
+#      options = file_config.merge(options)
       @project_name = File.basename(File.expand_path(dir))
       apt_packages << "libpq-dev postgresql-client" if options[:postgres]
       apt_packages << "mysql-client" if options[:mysql]
       apt_packages << "imagemagick" if options[:imagemagick]
       pre_apt << "echo 'Downloading Packages'"
       post_apt << "echo 'Packages Downloaded'"
-
-      options[:build_image] = "#{@project_name}/builder:latest" if options[:build_image].blank?
 
       if options[:yarn]
         apt_packages << 'yarn'
@@ -219,8 +219,17 @@ module StackCar
         ['hosts', 'deploy.yml', 'provision.yml'].each do |template_file|
           template("#{template_file}.erb", "ops/#{template_file}")
         end
+
         say 'Please update ops/hosts with the correct server addresses'
-      else
+      elsif options[:helm]
+        directory('chart')
+        if options[:fcrepo]
+          directory('chart-fcrepo', 'chart/templates')
+        end
+        if options[:sidekiq]
+          directory('chart-sidekiq', 'chart/templates')
+        end
+     else
         empty_directory('ops')
       end
 

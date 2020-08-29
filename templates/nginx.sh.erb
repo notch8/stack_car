@@ -18,7 +18,7 @@ declare -p | grep -Ev 'BASHOPTS|PWD|BASH_VERSINFO|EUID|PPID|SHELLOPTS|UID' > /co
 
 if [[ $PASSENGER_APP_ENV == "development" ]] || [[ $PASSENGER_APP_ENV == "test" ]]
 then
-    /sbin/setuser app /bin/bash -l -c 'cd /home/app/webapp && bundle exec rails db:migrate db:test:prepare'
+    /sbin/setuser app /bin/bash -l -c 'cd /home/app/webapp && bundle exec rails db:create db:migrate db:test:prepare'
 fi
 
 if [[ $PASSENGER_APP_ENV == "production" ]] || [[ $PASSENGER_APP_ENV == "staging" ]]

@@ -1,71 +1,75 @@
-image: <%= options[:build_image] %>
-services:
-  - docker:dind
-<% if options[:postgres] -%>
-  - postgres:latest
-<% end -%>
-<% if options[:mysql] -%>
-  - mysql:latest
-<% end -%>
-<% if options[:solr] -%>
-  - solr:latest
-<% end -%>
-<% if options[:elasticsearch] -%>
-  - elasticsearch:latest
-<% end -%>
-<% if options[:redis] -%>
-  - redis:latest
-<% end -%>
-
 stages:
-  - build
-  - test
-  - review
-  - staging
-  - production
-
-variables:
-<% if options[:postgres] -%>
-  POSTGRES_DB: <%= @project_name %>
-  POSTGRES_USER: postgres
-  POSTGRES_PASSWORD: password
-  POSTGRES_HOST: postgres
-<% end -%>
-<% if options[:mysql] -%>
-  MYSQL_DATABASE: <%= @project_name %>
-  MYSQL_ROOT_PASSWORD: password
-  MYSQL_USER: <%= @project_name %>_test
-  MYSQL_PASSWORD: password
-  MYSQL_HOST: mysql
-<% end -%>
-  TEST_DB: <%= @project_name %>
-  DOCKER_DRIVER: overlay
-  REGISTRY_HOST: registry.gitlab.com
-  REGISTRY_URI: TODO/<%= @project_name %>
-  SITE_URI_BASE: TODO
-
+- build
+- test
+- deploy
 
 before_script:
-  - export REGISTRY_FULL=registry.gitlab.com/notch8/ror-site/$CI_COMMIT_REF_SLUG:${CI_COMMIT_SHA:0:8}
-  - export TAG=$CI_COMMIT_REF_SLUG
-  - eval $(ssh-agent -s)
-  - bash
-  - ssh-add <(echo "$SSH_PRIVATE_KEY") 
-  - mkdir -p ~/.ssh
-  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+- export TAG=${CI_COMMIT_SHORT_SHA}
+- export BRANCH=${CI_COMMIT_REF_NAME}
+- export REGISTRY_HOST=${CI_REGISTRY}
+- export REGISTRY_URI="/${CI_PROJECT_PATH}"
+
+base:
+  stage: build
+  script:
+    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
+    - sc build -s base
+    - sc push -s base
+  when: manual
+  tags:
+    - local
 
 build:
   stage: build
   script:
-    - docker login -u "gitlab-ci-token" -p "$CI_BUILD_TOKEN" $CI_REGISTRY
+    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
     - sc build
     - sc push
+    - docker tag $CI_REGISTRY_IMAGE:$TAG $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   tags:
-    - docker
+    - local
+
 
 test:
   stage: test
-  image: $CI_REGISTRY_IMAGE:$CI_PROJECT_NAME-$CI_BUILD_REF_SLUG
+  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  services:
+    <% if options[:postgres] -%>
+    - name: postgres:11.1
+    <% end -%>
+    <% if options[:mysql] -%>
+    - mysql:5.7
+    <% end -%>
+    <% if options[:solr] -%>
+    - name: solr:latest
+      entrypoint: ["docker-entrypoint.sh", "solr-precreate", "test"]
+    <% end -%>
+    <% if options[:elasticsearch] -%>
+    - elasticsearch:latest
+    <% end -%>
+    <% if options[:redis] -%>
+    - redis:latest
+    <% end -%>
+    <% if options[:fcrepo] -%>
+    - name: botimer/fcrepo:4.5.1
+    <% end %>
+  variables:
+  <% if options[:postgres] -%>
+    POSTGRES_DB: <%= @project_name %>
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: password
+    POSTGRES_HOST: postgres
+  <% end -%>
+  <% if options[:mysql] -%>
+    MYSQL_DATABASE: <%= @project_name %>
+    MYSQL_ROOT_PASSWORD: password
+    MYSQL_USER: <%= @project_name %>_test
+    MYSQL_PASSWORD: password
+    MYSQL_HOST: mysql
+  <% end -%>
+    TEST_DB: <%= @project_name %>
+    SITE_URI_BASE: TODO
   script:
     - cd /home/app/webapp && bundle exec rake db:create db:schema:load spec
   tags:
@@ -77,7 +81,7 @@ review:
   stage: review
   type: deploy
   environment:
-    name: $CI_PROJECT_NAME-$CI_COMMIT_REF_SLUG
+    name: $CI_COMMIT_REF_SLUG
     url: http://web.$CI_PROJECT_NAME-$CI_COMMIT_REF_SLUG.staging.$SITE_URI_BASE
     on_stop: stop_review
   only:
@@ -88,12 +92,13 @@ review:
 <% if options[:rancher] -%>
     - export RANCHER_ENVIRONMENT=staging
     - sc provision ci
-<% else %>
+<% elsif options[:helm] -%>
+    - ./chart/bin/deploy review $CI_COMMIT_REF_SLUG
+<% else -%>
     - CHANGME
-<% end %>
+<% end -%>
  tags:
-    - docker
-    - mysql
+    - local
 
 stop_review:
   stage: review
@@ -101,6 +106,8 @@ stop_review:
 <% if options[:rancher] -%>
     - export RANCHER_ENVIRONMENT=staging
     - rancher rm $CI_PROJECT_NAME-$CI_BUILD_REF_SLUG
+<% elsif options[:helm] -%>
+    - ./chart/bin/remove review $CI_COMMIT_REF_SLUG
 <% end %>
   when: manual
   environment:
@@ -112,7 +119,9 @@ staging:
   type: deploy
   script:
 <% if options[:rancher] -%>
-    - sc deploy staging 
+  - sc deploy staging
+<% elsif options[:helm] -%>
+  - ./chart/bin/deploy staging $CI_COMMIT_REF_SLUG
 <% end -%>
 <% if options[:heroku] -%>
   - dpl --provider=heroku --app=<%= @project_name %>-staging --api-key=$HEROKU_STAGING_API_KEY --run="bundle exec rake db:migrate"
@@ -120,7 +129,7 @@ staging:
   only:
     - master
   tags:
-    - docker
+    - local
 
 production:
   stage: production
@@ -128,6 +137,8 @@ production:
   script:
 <% if options[:rancher] -%>
     - sc deploy production
+<% elsif options[:helm] -%>
+  - ./chart/bin/deploy production $CI_COMMIT_REF_SLUG
 <% end -%>
 <% if options[:heroku] -%>
   - dpl --provider=heroku --app=<%= @project_name %> --api-key=$HEROKU_PRODUCTION_API_KEY --run="bundle exec rake db:migrate"
@@ -136,4 +147,4 @@ production:
   only:
     - master
   tags:
-    - docker
+    - local

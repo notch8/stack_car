@@ -26,5 +26,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "yard-thor"
   spec.add_development_dependency "pry"
   spec.add_runtime_dependency "dotenv", "~> 2.2"
+  spec.add_runtime_dependency "json", "~> 2.3"
   spec.add_runtime_dependency "thor", "~> 0.19"
 end
