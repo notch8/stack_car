@@ -3,9 +3,10 @@ services:
 <% if options[:postgres] -%>
   postgres:
     image: postgres:11.1
-    env_file:
-      - .env
-      - .env.development
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=DatabaseFTW
+      - POSTGRES_DB=<%= @project_name %>
     ports:
       - "5432"
     volumes:
@@ -14,9 +15,11 @@ services:
 <% if options[:mysql] -%>
   mysql:
     image: mysql:5.7
-    env_file:
-      - .env
-      - .env.development
+    environment:
+      - MYSQL_DATABASE=<%= @project_name %>
+      - MYSQL_USER=<%= @project_name %>
+      - MYSQL_PASSWORD=DatabaseFTW
+      - MYSQL_ROOT_PASSWORD=DatabaseFTW
     ports:
       - '3306'
     volumes:
@@ -120,7 +123,9 @@ services:
       - .env
       - .env.development
     volumes:
-      - .:/home/app/webapp
+      - .:/home/app/webapp:cached
+      - node_modules:/home/app/webapp/node_modules
+      - tmp_cache:/home/app/webapp/tmp/cache
     # Keep the stdin open, so we can attach to our app container's process
     # and do things such as byebug, etc:
     stdin_open: true
@@ -174,3 +179,5 @@ volumes:
 <% if options[:fcrepo] -%>
   fcrepo:
 <% end -%>
+  tmp_cache:
+  node_modules:

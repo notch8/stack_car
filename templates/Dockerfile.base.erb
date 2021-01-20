@@ -50,7 +50,7 @@ RUN sed -i '/PDF/s/none/read|write/' /etc/ImageMagick-6/policy.xml
 <% end %>
 
 # this is so that these items are cached and only have to be updated
-RUN  /sbin/setuser app /bin/bash -l -c 'cd /home/app/webapp && DB_ADAPTER=nulldb bundle exec rake assets:precompile'
+RUN  /sbin/setuser app /bin/bash -l -c 'cd /home/app/webapp && DATABASE_ADAPTER=nulldb bundle exec rake assets:precompile'
 # Asset complie and migrate if prod, otherwise just start nginx
 ADD ops/nginx.sh /etc/service/nginx/run
 RUN chmod +x /etc/service/nginx/run

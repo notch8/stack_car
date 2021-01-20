@@ -30,7 +30,6 @@ build:
   tags:
     - local
 
-
 test:
   stage: test
   image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
@@ -60,6 +59,11 @@ test:
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: password
     POSTGRES_HOST: postgres
+    DATABASE_ADAPTER: postgresql
+    DATABASE_HOST: postgres
+    DATABASE_NAME: <%= @project_name %>
+    DATABASE_PASSWORD: password
+    DATABASE_USER: postgres
   <% end -%>
   <% if options[:mysql] -%>
     MYSQL_DATABASE: <%= @project_name %>
@@ -67,6 +71,11 @@ test:
     MYSQL_USER: <%= @project_name %>_test
     MYSQL_PASSWORD: password
     MYSQL_HOST: mysql
+    DATABASE_ADAPTER: mysql2
+    DATABASE_HOST: mysql
+    DATABASE_NAME: <%= @project_name %>
+    DATABASE_PASSWORD: password
+    DATABASE_USER: <%= @project_name %>_test
   <% end -%>
     TEST_DB: <%= @project_name %>
     SITE_URI_BASE: TODO

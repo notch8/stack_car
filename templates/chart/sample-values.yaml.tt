@@ -19,8 +19,12 @@ zookeeper:
 
 postgresql:
   enabled: true
+<% if options[:fedora] %>
   # Use fcrepo; the web app can create it's own db with db:create
   postgresqlDatabase: fcrepo
+<% else %>
+  postgresqlDatabase: <%= @project_name %>
+<% end %>
   postgresqlUsername: postgres
   # Only used when internal PG is disabled
   # postgresqlHost: postgres
@@ -32,9 +36,9 @@ postgresql:
 <% if options[:mysql] %>
 externalDatabase:
   host: host_name
-  user: <%= @project_name %> 
+  user: <%= @project_name %>
   password: 05cb2c6a26ce76
-  database: <%= @project_name %> 
+  database: <%= @project_name %>
   port: '3306'
 
 mariadb:
@@ -90,7 +94,7 @@ sidekiq:
 <% end %>
 rails:
   image:
-    repository: <%= @project_name %> 
+    repository: <%= @project_name %>
     tag: latest
   # If using a private registry setup access via secrets
   # imagePullSecrets:
@@ -101,10 +105,9 @@ rails:
       className: nfs
 
 ingress:
-  tlsSecretName: <%= @project_name %>_tls 
-  
+  tlsSecretName: <%= @project_name %>_tls
   # helm upgrade release-name . --set ingress.localhost
-  host: <%= @project_name %>.docker
+  host: <%= @project_name %>.com
 
 env:
   configmap:
@@ -119,16 +122,16 @@ env:
     SETTINGS__DEVISE__INVITATION_FROM_EMAIL: admin@example.org
     SETTINGS__FITS_PATH: /opt/fits/fits.sh
     SETTINGS__MULTITENANCY__ADMIN_HOST: app.docker
-    SETTINGS__MULTITENANCY__ADMIN_ONLY_TENANT_CREATION: true
+    SETTINGS__MULTITENANCY__ADMIN_ONLY_TENANT_CREATION: "true"
     SETTINGS__MULTITENANCY__DEFAULT_HOST: "%{tenant}.app.docker"
-    SETTINGS__MULTITENANCY__ENABLED: true
+    SETTINGS__MULTITENANCY__ENABLED: "true"
     <% end %>
     DATABASE_NAME: <%= @project_name %>
     IN_DOCKER: "true"
     PASSENGER_APP_ENV: production
     RAILS_ENV: production
-    RAILS_LOG_TO_STDOUT: true
-    RAILS_SERVE_STATIC_FILES: true
+    RAILS_LOG_TO_STDOUT: "true"
+    RAILS_SERVE_STATIC_FILES: "true"
 
   secret:
     SECRET_KEY_BASE: secretabc
