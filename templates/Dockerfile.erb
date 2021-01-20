@@ -15,14 +15,14 @@ RUN /sbin/setuser app bash -l -c "set -x && \
   git checkout $BRANCH && \
   git pull && \
   (bundle check || bundle install) && \
-  bundle exec rake assets:clobber assets:precompile DB_ADAPTER=nulldb && \
+  bundle exec rake assets:clobber assets:precompile DATABASE_ADAPTER=nulldb && \
   mv /home/app/webapp/public/assets /home/app/webapp/public/assets-new && \
   mv /home/app/webapp/public/packs /home/app/webapp/public/packs-new"
 <% else %>
 COPY --chown=app . $APP_HOME
 RUN /sbin/setuser app bash -l -c "set -x && \
   (bundle check || bundle install) && \
-  bundle exec rake assets:clobber assets:precompile DB_ADAPTER=nulldb && \
+  bundle exec rake assets:clobber assets:precompile DATABASE_ADAPTER=nulldb && \
   mv /home/app/webapp/public/assets /home/app/webapp/public/assets-new && \
   mv /home/app/webapp/public/packs /home/app/webapp/public/packs-new"
 <% end %>
