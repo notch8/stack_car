@@ -107,11 +107,23 @@ NOTE: stop / remove it with helm uninstall {name} --namespace default
 
 When deploying the Helm chart we will provide a yaml file containing various configurations choices.
 
-To use the `./bin/deploy` script, follow the convention of naming the values file  ENVIRONMENT-values.yaml, eg. development-values.yaml
-
-Values files are included in `.gitignore` and MUST NOT be added to the repository. To store values in the repository, encrypt the file, eg. with keybase as ENVIRONMENT.yaml.enc eg. staging.yaml.enc.
-
 A sample values file is provided to give defaults: `sample.yaml`. Copy this file (eg. to development-values.yamnl) and change values as appropriate.
+
+**Handling values files**
+
+Since values files are likely to contain sensitive information like API keys, they are included in `.gitignore` and MUST NOT be added to the repository. Encrypt the file before committing them to the repository, using the provided bin scripts in this directory.
+
+Example workflow (given values file is already created):
+- Edit values file
+- `chart/bin/encrypt staging <keybase-team-name>`
+  - This command will create `staging-values.yaml.enc`
+- `git add staging-values.yaml.enc`
+- Commit and push
+
+When pulling down a repo or branch, you will need to start by decrypting.
+
+Example:
+- `chart/bin/decrypt staging`
 
 ## Deploy using Helm
 
