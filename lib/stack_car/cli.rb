@@ -231,7 +231,15 @@ module StackCar
          File.read("#{self.class.source_root}/README.md")
        end
      end
-     append_to_file("Gemfile", "gem 'activerecord-nulldb-adapter'")
+
+      if File.exist?('Gemfile')
+        append_to_file('Gemfile', "gem 'activerecord-nulldb-adapter'")
+      else
+        append_to_file('../Gemfile', "gem 'activerecord-nulldb-adapter'", { verbose: false })
+        # TODO: remove '../' from message after other status messages are prepended with 'stack_car/'
+        say_status(:append, '../Gemfile')
+      end
+
       if options[:deploy] || options[:rancher]
         directory('ops')
         ['hosts', 'deploy.yml', 'provision.yml'].each do |template_file|
