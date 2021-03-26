@@ -237,6 +237,8 @@ module StackCar
       else
         append_to_file('../Gemfile', "gem 'activerecord-nulldb-adapter'", { verbose: false })
         # TODO: remove '../' from message after other status messages are prepended with 'stack_car/'
+       append_to_file("../Gemfile", "gem 'pronto', groups: [:development, :test]")
+       append_to_file("../Gemfile", "gem 'pronto-rubocop', groups: [:development, :test]")
         say_status(:append, '../Gemfile')
       end
 

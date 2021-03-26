@@ -30,6 +30,18 @@ build:
   tags:
     - local
 
+lint:
+  stage: go
+  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  variables:
+    PRONTO_GITLAB_API_ENDPOINT: "https://gitlab.com/api/v4"
+  before_script:
+    - export PRONTO_GITLAB_API_PRIVATE_TOKEN=$GITLAB_API_TOKEN
+  script:
+    - cd /home/app/webapp && bundle exec pronto run -f gitlab
+  tags:
+    - docker
+
 test:
   stage: test
   image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
