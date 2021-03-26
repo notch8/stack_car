@@ -2,7 +2,7 @@ require 'thor'
 require 'erb'
 require 'dotenv/load'
 require 'json'
-
+require 'byebug'
 module StackCar
   class HammerOfTheGods < Thor
     include Thor::Actions
@@ -20,6 +20,7 @@ module StackCar
     method_option :logs, default: true, type: :boolean
     desc "up", "starts docker-compose with rebuild and orphan removal, defaults to web"
     def up
+      setup
       ensure_development_env
       args = ['--remove-orphans']
       args << '--build' if options[:build]
@@ -33,6 +34,7 @@ module StackCar
     method_option :service, default: '', type: :string, aliases: '-s'
     desc "stop", "stops the specified running service, defaults to all"
     def stop
+      setup
       ensure_development_env
       run("#{dotenv} docker-compose stop #{options[:service]}")
       run_with_exit("rm -rf tmp/pids/*")
@@ -42,6 +44,7 @@ module StackCar
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "build", "builds specified service, defaults to web"
     def build
+      setup
       ensure_development_env
       run_with_exit("#{dotenv} docker-compose build #{options[:service]}")
     end
@@ -49,18 +52,21 @@ module StackCar
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "push ARGS", "wraps docker-compose push web unless --service is used to specify"
     def push(*args)
+      setup
       run_with_exit("#{dotenv} docker-compose push #{options[:service]} #{args.join(' ')}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "pull ARGS", "wraps docker-compose pull web unless --service is used to specify"
     def pull(*args)
+      setup
       run_with_exit("#{dotenv} docker-compose pull #{options[:service]} #{args.join(' ')}")
     end
 
     method_option :service, default: '', type: :string, aliases: '-s'
     desc "ps ARGS", "wraps docker-compose pull web unless --service is used to specify"
     def ps(*args)
+      setup
       run_with_exit("#{dotenv} docker-compose ps #{options[:service]} #{args.join(' ')}")
     end
     map status: :ps
@@ -68,18 +74,21 @@ module StackCar
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "bundle ARGS", "wraps docker-compose run web unless --service is used to specify"
     def bundle(*args)
+      setup
       run_with_exit("#{dotenv} docker-compose exec #{options[:service]} bundle")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "walk ARGS", "wraps docker-compose run web unless --service is used to specify"
     def walk(*args)
+      setup
       run_with_exit("#{dotenv} docker-compose run #{options[:service]} #{args.join(' ')}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "exec ARGS", "wraps docker-compose exec web unless --service is used to specify"
     def exec(*args)
+      setup
       run_with_exit("#{dotenv} docker-compose exec #{options[:service]} #{args.join(' ')}")
     end
     map ex: :exec
@@ -87,12 +96,14 @@ module StackCar
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc 'sh ARGS', "launch a shell using docker-compose exec, sets tty properly"
     def sh(*args)
+      setup
       run_with_exit("#{dotenv} docker-compose exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput lines\`\" #{options[:service]} bash #{args.join(' ')}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "bundle_exec ARGS", "wraps docker-compose exec web bundle exec unless --service is used to specify"
     def bundle_exec(*args)
+      setup
       run_with_exit("#{dotenv} docker-compose exec #{options[:service]} bundle exec #{args.join(' ')}")
     end
     map be: :bundle_exec
@@ -100,12 +111,14 @@ module StackCar
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "console ARGS", "shortcut to start rails console"
     def console(*args)
+      setup
       run_with_exit("#{dotenv} docker-compose exec #{options[:service]} bundle exec rails console #{args.join(' ')}")
     end
     map rc: :console
 
     desc "release ENVIRONTMENT", "tag and push and image to the registry"
     def release(environment)
+      setup
       timestamp = Time.now.strftime("%Y%m%d%I%M%S")
       sha = `git rev-parse HEAD`[0..8]
       registry = "#{ENV['REGISTRY_HOST']}#{ENV['REGISTRY_URI']}"
@@ -125,12 +138,14 @@ module StackCar
 
     desc "provision ENVIRONMENT", "configure the servers for docker and then deploy an image"
     def provision(environment)
+      setup
       # TODO make dotenv load a specific environment?
       run_with_exit("DEPLOY_ENV=#{environment} #{dotenv(environment)} ansible-playbook -i ops/hosts -l #{environment}:localhost ops/provision.yml")
     end
 
     desc "ssh ENVIRONMENT", "log in to a running instance - requires PRODUCTION_SSH to be set"
     def ssh(environment)
+      setup
       target = ENV["#{environment.upcase}_SSH"]
       if target
         run_with_exit(target)
@@ -141,6 +156,7 @@ module StackCar
 
     desc "deploy ENVIRONMENT", "deploy an image from the registry"
     def deploy(environment)
+      setup
       run_with_exit("DEPLOY_HOOK=$DEPLOY_HOOK_#{environment.upcase} #{dotenv(environment)} ansible-playbook -i ops/hosts -l #{environment}:localhost ops/deploy.yml")
     end
 
@@ -171,8 +187,10 @@ module StackCar
     DOCKERIZE
     def dockerize(dir=".")
       Dir.chdir(dir)
+      self.destination_root = dir
+      setup
       # Commandline overrides config files
-#      options = file_config.merge(options)
+      # options = file_config.merge(options)
       @project_name = File.basename(File.expand_path(dir))
       apt_packages << "libpq-dev postgresql-client" if options[:postgres]
       apt_packages << "mysql-client" if options[:mysql]
@@ -213,7 +231,17 @@ module StackCar
          File.read("#{self.class.source_root}/README.md")
        end
      end
-     append_to_file("Gemfile", "gem 'activerecord-nulldb-adapter'")
+
+      if File.exist?('Gemfile')
+        append_to_file('Gemfile', "gem 'activerecord-nulldb-adapter'")
+      else
+        append_to_file('../Gemfile', "gem 'activerecord-nulldb-adapter'", { verbose: false })
+        # TODO: remove '../' from message after other status messages are prepended with 'stack_car/'
+       append_to_file("../Gemfile", "gem 'pronto', groups: [:development, :test]")
+       append_to_file("../Gemfile", "gem 'pronto-rubocop', groups: [:development, :test]")
+        say_status(:append, '../Gemfile')
+      end
+
       if options[:deploy] || options[:rancher]
         directory('ops')
         ['hosts', 'deploy.yml', 'provision.yml'].each do |template_file|
@@ -312,6 +340,14 @@ module StackCar
 
     def dotenv(environment='development')
       "dotenv -f .env.#{environment},.env"
+    end
+
+    def setup
+      if File.exists?('stack_car')
+        Dir.chdir('stack_car')
+        self.destination_root += "/stack_car"
+      end
+      DotRc.new
     end
   end
 end

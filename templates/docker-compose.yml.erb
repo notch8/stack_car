@@ -112,8 +112,8 @@ services:
 
   app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: stack_car/Dockerfile
       args:
         DEPLOY_KEY: "${DEPLOY_KEY}"
         REPO_URL: "${REPO_URL}"
