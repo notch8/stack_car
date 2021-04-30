@@ -6,7 +6,7 @@
 /doc/
 /pkg/
 /spec/reports/
-/test-app/
+/test_app/
 /tmp/
 **/.#*
 /public/*
