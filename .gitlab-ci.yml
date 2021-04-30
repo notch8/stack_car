@@ -1,11 +1,6 @@
-image: ruby:2.3
-
 stages:
   - build
   - test
-
-before_script:
-  - bundle
 
 # pages:
 #   stage: build
@@ -18,6 +13,7 @@ before_script:
 #   - master 
 
 test:
+  image: ruby:2.3
   script:
     - bundle exec rspec
   tags:
