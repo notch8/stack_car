@@ -20,4 +20,6 @@ before_script:
 test:
   script:
     - bundle exec rspec
+  tags:
+    - local
     
