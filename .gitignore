@@ -10,3 +10,4 @@
 /tmp/
 **/.#*
 /public/*
+.byebug_history
