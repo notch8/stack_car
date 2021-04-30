@@ -13,6 +13,9 @@ describe StackCar do
     FileUtils.mkdir_p test_app_path
     Dir.chdir('test_app')
     FileUtils.touch 'Gemfile'
+    `git init`
+    `echo '.bundle' > .gitignore`
+
   end
 
   def runner(options = {})
@@ -35,8 +38,6 @@ describe StackCar do
   it "generates Docker files for local building and development" do
     setup_test_app
 
-    `git init`
-    `echo '.bundle' > .gitignore`
     runner({postgres: true, mysql: true, delayed_job: true})
     action("dockerize", '.')
   end
@@ -45,8 +46,6 @@ describe StackCar do
     setup_test_app
     FileUtils.mkdir_p 'stack_car'
 
-    `git init`
-    `echo '.bundle' > .gitignore`
     runner({postgres: true, mysql: true, delayed_job: true, helm: true})
     action("dockerize", '.')
   end
