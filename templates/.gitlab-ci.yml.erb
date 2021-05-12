@@ -109,7 +109,7 @@ review:
   only:
     - branches
   except:
-    - master
+    - main
   script:
 <% if options[:rancher] -%>
     - export RANCHER_ENVIRONMENT=staging
@@ -149,7 +149,7 @@ staging:
   - dpl --provider=heroku --app=<%= @project_name %>-staging --api-key=$HEROKU_STAGING_API_KEY --run="bundle exec rake db:migrate"
 <% end -%>
   only:
-    - master
+    - main
   tags:
     - local
 
@@ -167,6 +167,6 @@ production:
 <% end -%>
   when: manual
   only:
-    - master
+    - main
   tags:
     - local
