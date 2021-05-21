@@ -169,13 +169,13 @@ module StackCar
     method_option :heroku, default: false, type: :boolean, aliases: '-h'
     method_option :hyku, default: false, type: :boolean, aliases: '-u'
     method_option :imagemagick, default: false, type: :boolean, aliases: '-i'
-    method_option :memcached, default: false, type: :boolean, aliases: '-mc'
-    method_option :mongodb, default: false, type: :boolean, aliases: '-mg'
+    method_option :memcached, default: false, type: :boolean, aliases: "\--mc"
+    method_option :mongodb, default: false, type: :boolean, aliases: "\--mg"
     method_option :mysql, default: false, type: :boolean, aliases: '-m'
     method_option :postgres, default: false, type: :boolean, aliases: '-p'
-    method_option :rancher, default: false, type: :boolean, aliases: '-dr'
+    method_option :rancher, default: false, type: :boolean, aliases: "\--dr"
     method_option :redis, default: false, type: :boolean, aliases: '-r'
-    method_option :sidekiq, default: false, type: :boolean, aliases: '-sq' # TODO
+    method_option :sidekiq, default: false, type: :boolean, aliases: "\--sk"
     method_option :solr, default: false, type: :boolean, aliases: '-s'
     method_option :yarn, default: false, type: :boolean, aliases: '-y'
     desc 'dockerize DIR', 'Will copy the docker tempates in to your project, see options for supported dependencies'

@@ -117,7 +117,6 @@ env:
     <% if options[:fcrepo] %>
     FC_DATABASE_NAME: fcrepo
     LD_LIBRARY_PATH: /opt/fits-latest/tools/mediainfo/linux
-    SETTINGS__ACTIVE_JOB__QUEUE_ADAPTER: sidekiq
     SETTINGS__CONTACT_EMAIL: admin@example.org
     SETTINGS__DEVISE__INVITATION_FROM_EMAIL: admin@example.org
     SETTINGS__FITS_PATH: /opt/fits/fits.sh
@@ -125,6 +124,9 @@ env:
     SETTINGS__MULTITENANCY__ADMIN_ONLY_TENANT_CREATION: "true"
     SETTINGS__MULTITENANCY__DEFAULT_HOST: "%{tenant}.app.docker"
     SETTINGS__MULTITENANCY__ENABLED: "true"
+    <% end %>
+    <% if options[:sidekiq] %>
+    SETTINGS__ACTIVE_JOB__QUEUE_ADAPTER: sidekiq
     <% end %>
     DATABASE_NAME: <%= @project_name %>
     IN_DOCKER: "true"
