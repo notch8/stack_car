@@ -17,6 +17,7 @@ zookeeper:
     size: 1Gi
 <% end %>
 
+<% if options[:postgres] %>
 postgresql:
   enabled: true
 <% if options[:fedora] %>
@@ -33,6 +34,8 @@ postgresql:
   persistence:
     enabled: true
     size: 1Gi
+<% end %>
+
 <% if options[:mysql] %>
 externalDatabase:
   host: host_name
