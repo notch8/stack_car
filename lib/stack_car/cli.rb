@@ -214,7 +214,7 @@ module StackCar
         post_apt << "cd /opt && unzip fits-1.0.5.zip && chmod +X fits-1.0.5/fits.sh"
       end
 
-     ['.dockerignore', 'Dockerfile', 'Dockerfile.base', 'docker-compose.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
+     ['.dockerignore', 'Dockerfile', 'docker-compose.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
        puts template_file
         template("#{template_file}.erb", template_file)
      end
