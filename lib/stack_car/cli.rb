@@ -344,6 +344,7 @@ module StackCar
 
     def setup
       if File.exists?('stack_car')
+        @sc_dir = true
         Dir.chdir('stack_car')
         self.destination_root += "/stack_car"
       end

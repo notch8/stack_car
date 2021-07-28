@@ -99,9 +99,14 @@ services:
 
   app:
     build:
-      context: ..
+    <% if @sc_dir -%>
+  context: ..
       dockerfile: stack_car/Dockerfile
-      args:
+    <% else -%>
+  context: .
+      dockerfile: Dockerfile
+    <% end -%>
+  args:
         DEPLOY_KEY: "${DEPLOY_KEY}"
         REPO_URL: "${REPO_URL}"
         BRANCH: "${BRANCH}"
