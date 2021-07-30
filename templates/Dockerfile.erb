@@ -19,6 +19,7 @@ RUN /sbin/setuser app bash -l -c "set -x && \
   mv /home/app/webapp/public/assets /home/app/webapp/public/assets-new && \
   mv /home/app/webapp/public/packs /home/app/webapp/public/packs-new"
 <% else -%>
+RUN gem install bundler -v CHANGEME # Add the version listed in the Gemfile
 COPY --chown=app . $APP_HOME
 RUN /sbin/setuser app bash -l -c "set -x && \
   (bundle check || bundle install) && \
