@@ -165,7 +165,7 @@ module StackCar
     method_option :elasticsearch, default: false, type: :boolean, aliases: '-e'
     method_option :fcrepo, default: false, type: :boolean, aliases: '-f'
     method_option :helm, default: false, type: :boolean, aliases: '-h'
-    method_option :git, default: true, type: :boolean, aliases: '-g'
+    method_option :git, default: false, type: :boolean, aliases: '-g'
     method_option :heroku, default: false, type: :boolean, aliases: '-h'
     method_option :hyku, default: false, type: :boolean, aliases: '-u'
     method_option :imagemagick, default: false, type: :boolean, aliases: '-i'
@@ -214,7 +214,7 @@ module StackCar
         post_apt << "cd /opt && unzip fits-1.0.5.zip && chmod +X fits-1.0.5/fits.sh"
       end
 
-     ['.dockerignore', 'Dockerfile', 'Dockerfile.base', 'docker-compose.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
+     ['.dockerignore', 'Dockerfile', 'docker-compose.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
        puts template_file
         template("#{template_file}.erb", template_file)
      end
@@ -344,6 +344,7 @@ module StackCar
 
     def setup
       if File.exists?('stack_car')
+        @sc_dir = true
         Dir.chdir('stack_car')
         self.destination_root += "/stack_car"
       end
