@@ -4,6 +4,13 @@
 
 Stack Car is an opinionated set of tools around Docker and Rails.  It provides convenent methods to start and stop docker-compose, to deploy with rancher and a set of templates to get a new Rails app in to docker as quickly as possible.
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Development](#development)
+- [Dockerizing an Application](#dockerizing-an-application)
+- [Generating a Helm Chart](#generating-a-helm-chart)
 
 ## Installation
 
@@ -53,6 +60,58 @@ Developing stack_car often requires a rails application for you to run updated c
 - Update the version number in `version.rb`
 - Run `bundle exec rake release`
   - This will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+
+## Dockerizing an application
+
+Dockerizing your application with stack_car can be thought of in 2 steps:
+- **Generate the file templates**
+- **Customize provided templates to the requirements of the application**
+
+### Generate templates (`sc dockerize`)
+You can generate requisite files for running your application for local development in Docker with the **dockerize** command.
+
+To **dockerize** your application:
+- `cd` into your project dir
+- Run `sc dockerize` to generate files, appending **service flags** to scaffold any other services your application requires
+  - **For example**:
+    - For rails/postgres: `sc dockerize --postgres`
+    - For rails/mysql/redis: `sc dockerize --mysql --redis`
+
+This command will provide:
+- `Dockerfile`
+- `docker-compose.yml`
+- `.env*` files
+-  **ops** files to get you set up for running your application with **nginx**.
+
+### Customize templates
+
+stack_car will have provided sensible defaults for your services but customization will be required per needs of each project (ie api tokens and email configuration where applicable).
+
+**Customization workflow**
+- Do a text search to find and replace any instances `CHANGEME` in the generated files
+- Add any **general environment variables** to `.env`
+  - This sets defaults for all docker compose environments
+- Add any **development environment variables** to `.env.development` 
+  - These set up any new values or overrides specific to your development env
+- Run `sc build` to build your image
+  - On failed build, browse the terminal output to track down and squash any misconfigurations. Rebuild
+- Upon successful build, run `sc up` to spin up project
+  - If you get errors, browse the terminal output to track down and squash any misconfigurations (refer to the Docker dashboard to see separate logs for each service)
+- Visit site at `localhost:3000`
+  - Alternatively, visit it at the host you have specified to work with **Dory**
+- **Note**: *Depending on the DB required by your application, you will need to create the DB. You need to do that within from the container:*
+  - Using the `bundle-exec` command: `sc bundle-exec db:create`
+  - Shelling in and running in the container shell:
+  ```bash
+      sc exec bash
+      bundle exec rails db:create
+  ```
+
+Once all services are running and speaking to each other you are good to go.
+
+**Tips**:
+- Any changes to `Dockerfile` will require `sc build` for the changes to manifest
+- Changes to `docker-compose.yml` **do not require rebuild unless you have changed the image**
 
 ## Generating a Helm Chart
 

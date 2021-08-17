@@ -165,17 +165,17 @@ module StackCar
     method_option :elasticsearch, default: false, type: :boolean, aliases: '-e'
     method_option :fcrepo, default: false, type: :boolean, aliases: '-f'
     method_option :helm, default: false, type: :boolean, aliases: '-h'
-    method_option :git, default: true, type: :boolean, aliases: '-g'
+    method_option :git, default: false, type: :boolean, aliases: '-g'
     method_option :heroku, default: false, type: :boolean, aliases: '-h'
-    method_option :hyku, default: false, type: :boolean, aliases: '-u'
+    method_option :hyku, default: false, type: :boolean, aliases: "\--hu" 
     method_option :imagemagick, default: false, type: :boolean, aliases: '-i'
-    method_option :memcached, default: false, type: :boolean, aliases: '-mc'
-    method_option :mongodb, default: false, type: :boolean, aliases: '-mg'
+    method_option :memcached, default: false, type: :boolean, aliases: "\--mc"
+    method_option :mongodb, default: false, type: :boolean, aliases: "\--mg"
     method_option :mysql, default: false, type: :boolean, aliases: '-m'
     method_option :postgres, default: false, type: :boolean, aliases: '-p'
-    method_option :rancher, default: false, type: :boolean, aliases: '-dr'
+    method_option :rancher, default: false, type: :boolean, aliases: "\--dr"
     method_option :redis, default: false, type: :boolean, aliases: '-r'
-    method_option :sidekiq, default: false, type: :boolean, aliases: '-sq' # TODO
+    method_option :sidekiq, default: false, type: :boolean, aliases: "\--sk"
     method_option :solr, default: false, type: :boolean, aliases: '-s'
     method_option :yarn, default: false, type: :boolean, aliases: '-y'
     desc 'dockerize DIR', 'Will copy the docker tempates in to your project, see options for supported dependencies'
@@ -214,7 +214,7 @@ module StackCar
         post_apt << "cd /opt && unzip fits-1.0.5.zip && chmod +X fits-1.0.5/fits.sh"
       end
 
-     ['.dockerignore', 'Dockerfile', 'Dockerfile.base', 'docker-compose.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
+     ['.dockerignore', 'Dockerfile', 'docker-compose.yml', '.gitlab-ci.yml', '.env'].each do |template_file|
        puts template_file
         template("#{template_file}.erb", template_file)
      end
@@ -344,6 +344,7 @@ module StackCar
 
     def setup
       if File.exists?('stack_car')
+        @sc_dir = true
         Dir.chdir('stack_car')
         self.destination_root += "/stack_car"
       end

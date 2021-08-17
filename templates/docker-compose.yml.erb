@@ -97,24 +97,16 @@ services:
       - "8080"
 <% end -%>
 
-  base:
-    image: "${REGISTRY_HOST}${REGISTRY_URI}/base:latest"
-    build:
-      context: .
-      dockerfile: Dockerfile.base
-      args:
-        DEPLOY_KEY: "${DEPLOY_KEY}"
-        APP_NAME: "${APP_NAME}"
-        REPO_URL: "${REPO_URL}"
-    env_file:
-      - .env
-      - .env.development
-
   app:
     build:
-      context: ..
+    <% if @sc_dir -%>
+  context: ..
       dockerfile: stack_car/Dockerfile
-      args:
+    <% else -%>
+  context: .
+      dockerfile: Dockerfile
+    <% end -%>
+  args:
         DEPLOY_KEY: "${DEPLOY_KEY}"
         REPO_URL: "${REPO_URL}"
         BRANCH: "${BRANCH}"
@@ -133,8 +125,7 @@ services:
     tty: true
 
   web:
-    extends:
-      app:
+    extends: app
     ports:
       - "${WEB_PORT}"
     environment:
