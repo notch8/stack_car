@@ -111,7 +111,7 @@ Once all services are running and speaking to each other you are good to go.
 
 **Tips**:
 - Any changes to `Dockerfile` will require `sc build` for the changes to manifest
-- Changes to `docker-compose.yml` **do not require rebuild *unless you have changed the image***
+- Changes to `docker-compose.yml` **do not require rebuild unless you have changed the image**
 
 ## Generating a Helm Chart
 
