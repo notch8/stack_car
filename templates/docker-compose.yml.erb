@@ -110,7 +110,7 @@ services:
         DEPLOY_KEY: "${DEPLOY_KEY}"
         REPO_URL: "${REPO_URL}"
         BRANCH: "${BRANCH}"
-    image: "${REGISTRY_HOST}${REGISTRY_URI}:${TAG:-master}"
+    image: "${REGISTRY_HOST}${REGISTRY_URI}:${TAG:-main}"
     env_file:
       - .env
       - .env.development

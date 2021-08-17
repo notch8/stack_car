@@ -2,7 +2,6 @@
 
 <% if options[:mysql] -%>
 login: &login
-  adapter: mysql2
   adapter: <%%= ENV['DATABASE_ADAPTER'] %>
   host: <%%= ENV['DATABASE_HOST'] %>
   username: <%%= ENV['DATABASE_USER'] %>

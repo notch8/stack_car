@@ -44,7 +44,7 @@ Shorthand for component names
 <%- end %>
 <%- if options[:redis] %>
 {{- define "app.redis.name" -}}
-{{- .Release.Name -}}-redis-master
+{{- .Release.Name -}}-redis-primary
 {{- end -}}
 <%- end %>
 <%- if options[:sidekiq] %>
