@@ -39,7 +39,55 @@ module StackCar
       run("#{dotenv} docker-compose stop #{options[:service]}")
       run_with_exit("rm -rf tmp/pids/*")
     end
-    map down: :stop
+
+    method_option :volumes, aliases: '-v'
+    method_option :rmi
+    method_option :'remove-orphans'
+    method_option :service, aliases: '-s'
+    method_option :timeout, aliases: '-t'
+    method_option :all, aliases: '-a'
+    method_option :help, aliases: '-h'
+    desc 'down', 'stops and removes containers and networks specific to this project by default, run with -h for more options'
+    def down
+      setup
+      ensure_development_env
+      
+      if options[:help]
+        run('docker-compose down --help')
+        say 'Additional stack_car options:'
+        say '    -a, --all               Removes all containers, networks, volumes, and'
+        say '                            images created by `up`.'
+        say '    -s, --service           Specify a service defined in the Compose file'
+        say '                            whose containers and volumes should be removed.'
+        exit(0)
+      end
+
+      if options[:service]
+        rm_vol = true if options[:volumes]
+
+        remove_container(options[:service], rm_vol)
+        exit(0)
+      end
+
+      run_conf = 'Running down will stop and remove all of the Docker containers and networks ' \
+                 'defined in the docker-compose.yml file. Continue?'
+      prompt_run_confirmation(run_conf)
+
+      args = []
+      if options[:all]
+        prompt_run_confirmation('--all will remove all containers, volumes, networks, local images, and orphaned containers. Continue?')
+
+        args = %w[--volumes --rmi=local --remove-orphans]
+      else
+        args << '--volumes' if options[:volumes]
+        args << '--rmi=local' if options[:rmi]
+        args << '--remove-orphans' if options[:'remove-orphans']
+        args << '--timeout' if options[:timeout]
+      end
+
+      run("#{dotenv} docker-compose down #{args.join(' ')}")
+      run_with_exit('rm -rf tmp/pids/*')
+    end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "build", "builds specified service, defaults to web"
@@ -349,6 +397,78 @@ module StackCar
         self.destination_root += "/stack_car"
       end
       DotRc.new
+    end
+
+    def remove_container(service_name, remove_volumes)
+      container = find_container_by_service(service_name)
+
+      container.map do |id, name|
+        prompt_run_confirmation("Remove #{name} container?")
+
+        if `docker container ls --format "{{.Names}}"`.include?(name)
+          say 'Stopping container...'
+          `docker stop #{id}`
+        end
+
+        say 'Removing container...'
+        `docker container rm #{id}`
+
+        # Ensure container was removed
+        if `docker ps -aqf id=#{id}`.empty?
+          say "  Container #{name} was removed"
+        else
+          say ">>> There was an issue removing container #{name} (#{id})"
+        end
+      end
+
+      remove_volumes_mounted_to_container(@container_volume_names) if remove_volumes
+    end
+
+    def find_container_by_service(service_name)
+      container_id = `docker-compose ps -aq #{service_name}`.strip
+
+      if container_id.empty?
+        say "Unable to locate a container for the service '#{service_name}'"
+        say "Try running `docker-compose ps #{service_name}` to make sure the container exists"
+        exit(1)
+      end
+
+      get_volume_names_for_container(container_id)
+      container_name = `docker ps -af id=#{container_id} --format "{{.Names}}"`.strip
+
+      { container_id => container_name }
+    end
+
+    def remove_volumes_mounted_to_container(volumes)
+      return if volumes.empty?
+
+      prompt_run_confirmation("\n#{volumes.join("\n")}\nRemove these volume(s)?")
+      volumes.each do |v|
+        say 'Removing volume...'
+        `docker volume rm #{v}`
+
+        if `docker volume ls -q`.include?(v)
+          say ">>> There was an issue removing volume #{v}"
+        else
+          say "  Volume #{v} was removed"
+        end
+      end
+    end
+
+    def get_volume_names_for_container(container_id)
+      @container_volume_names ||= []
+      return @container_volume_names unless @container_volume_names.empty?
+
+      JSON.parse(`docker inspect --format="{{json .Mounts}}" #{container_id}`).map do |mount_info|
+        @container_volume_names << mount_info['Name'] if mount_info['Type'] == 'volume'
+      end
+
+      @container_volume_names
+    end
+
+    def prompt_run_confirmation(question)
+      response = ask(question, limited_to: %w[y n])
+      exit(1) unless response == 'y'
     end
   end
 end
