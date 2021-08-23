@@ -147,15 +147,14 @@ Since values files are likely to contain sensitive information like API keys, th
 
 Example workflow (given values file is already created):
 - Edit values file
-- `chart/bin/encrypt staging <keybase-team-name>`
-  - This command will create `staging-values.yaml.enc`
-- `git add staging-values.yaml.enc`
+- `bin/encrypt-secrets`
+  - This command will create/update `staging-values.yaml.enc`
 - Commit and push
 
 When pulling down a repo or branch, you will need to start by decrypting.
 
 Example:
-- `chart/bin/decrypt staging`
+- `bin/decrypt-secrets`
 
 ## Contributing
 
