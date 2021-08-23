@@ -268,6 +268,9 @@ module StackCar
      end
      template(".env.development.erb", ".env.development")
      template(".env.erb", ".env.production")
+     template(".sops.yaml.erb", ".sops.yaml")
+     template("decrypt-secrets", "bin/decrypt-secrets")
+     template("encrypt-secrets", "bin/encrypt-secrets")
      template("database.yml.erb", "config/database.yml")
      template("development.rb.erb", "config/environments/development.rb")
      template("production.rb.erb", "config/environments/production.rb")

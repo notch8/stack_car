@@ -2,13 +2,15 @@
 
 [Bash into the container](#bash-into-the-container)
 
+[Handling Secrets with SOPS](#handling-secrets-with-sops)
+
 [Deploy a new release](#deploy-a-new-release)
   
 [Run import from admin page](#run-import-from-admin-page)
 
 # Docker development setup
 
-We recommend committing .env to your repo with good defaults. .env.development, .env.production etc can be used for local overrides and should not be in the repo.
+We recommend committing .env to your repo with good defaults. .env.development, .env.production etc can be used for local overrides and should not be in the repo. See [Handling Secrets with SOPS](#handling-secrets-with-sops) for how to manage secrets.
 
 1) Install Docker.app
 
@@ -53,6 +55,38 @@ docker login registry.gitlab.com
     ``` bash
     bundle exec rails c
     ```
+
+### Handling Secrets with SOPS
+
+[**SOPS**](https://github.com/mozilla/sops) is used to handle this project's secrets.
+
+The secrets in this repository include:
+- `.env*` files
+- `*-values.yaml` files
+
+Scripts (`bin/decrypt-secrets` and `bin/encrypt-secrets`) are included in this project to help with managing secrets.
+
+**To decrypt secrets**:
+
+You will need to do this if you are new to the project or there have been changes to any secrets files that are required for development.
+
+In terminal:
+```bash
+bin/decrypt-secrets
+```
+
+This will find and decrypt files with the `.enc` extension.
+
+**To encrypt secrets**:
+
+You will need to do this when you have edited secrets and are ready to commit them.
+
+In terminal:
+```bash
+bin/encrypt-secrets
+```
+
+This will find and output an encrypted version of secret files with an `.enc` extension.
 
 # Deploy a new release
 
