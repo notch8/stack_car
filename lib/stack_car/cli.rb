@@ -320,7 +320,7 @@ module StackCar
     protected
     def compose_depends(*excludes)
       @compose_depends = []
-      services = [:postgres, :mysql, :elasticsearch, :solr, :redis, :mongodb, :memcached] - excludes
+      services = [:fcrepo, :postgres, :mysql, :elasticsearch, :sidekiq, :solr, :redis, :mongodb, :memcached] - excludes
       services.each do |service|
         if options[service]
           @compose_depends << "      - #{service}"

@@ -138,6 +138,7 @@ services:
   worker:
     extends: app
     command: ./bin/delayed_job run
+    depends_on:
 <%= compose_depends %>
 <% end %>
 
@@ -145,6 +146,7 @@ services:
   worker:
     extends: app
     command: bundle exec sidekiq
+    depends_on:
 <%= compose_depends %>
 <% end %>
 

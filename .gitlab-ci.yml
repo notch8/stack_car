@@ -1,17 +1,22 @@
-image: ruby:2.3
+stages:
+  - rspec 
 
 before_script:
-  bundle
+  - bundle
 
-pages:
-  script:
-  - bundle exec yardoc --plugin yard-thor -o public - templates/.* templates/* 
-  artifacts:
-    paths:
-    - public
-  only:
-  - master 
+# pages:
+#   script:
+#   - bundle exec yardoc --plugin yard-thor -o public - templates/.* templates/* 
+#   artifacts:
+#     paths:
+#     - public
+#   only:
+#   - master 
 
-test:
+rspec:
+  stage: rspec
+  image: ruby:2.3
   script:
-    bundle exec rake
+    - bundle exec rspec
+  tags:
+    - docker

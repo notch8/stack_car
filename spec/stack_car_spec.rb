@@ -18,19 +18,160 @@ describe StackCar do
     expect(StackCar::VERSION).not_to be nil
   end
 
-  it 'can write the compose_paras' do
+  it 'can write the compose_params' do
     runner.options = {postgres: true}
     expect(runner.send(:compose_depends)).to eq("      - postgres")
   end
 
-  it "dockerizes" do
-    path = File.join(ROOT_DIR, 'tmp', 'dockerize')
-    FileUtils.rm_rf path
-    FileUtils.mkdir_p path
-    Dir.chdir(path)
-    `git init`
-    `echo '.bundle' > .gitignore`
-    runner({postgres: true, mysql: true, delayed_job: true})
-    action("dockerize", '.')
+  context "dockerize" do
+
+    before(:each) do
+      # Set up test Rails project directory
+      path = File.join(ROOT_DIR, 'tmp', 'dockerize')
+      FileUtils.rm_rf path
+      FileUtils.mkdir_p path
+      Dir.chdir(path)
+      `git init`
+      `touch Gemfile`
+      `echo '.bundle' > .gitignore`
+    end
+
+    it 'generates compose templates' do
+      project_root_contents = Dir.entries('.')
+      expect(project_root_contents.include?('docker-compose.yml')).to eq false
+      expect(project_root_contents.include?('Dockerfile')).to eq false
+      action("dockerize", '.')
+      dockerized_project_root_contents = Dir.entries('.')
+      expect(dockerized_project_root_contents.include?('docker-compose.yml')).to eq true
+      expect(dockerized_project_root_contents.include?('Dockerfile')).to eq true
+    end
+
+    it 'does not configure services additional to Rails unless a flag is passed' do
+      action("dockerize", '.')
+      compose = YAML.load_file('docker-compose.yml')
+      expect(compose['services'].include?('elasticsearch')).to eq false
+      expect(compose['services'].include?('fcrepo')).to eq false
+      expect(compose['services'].include?('memcached')).to eq false
+      expect(compose['services'].include?('mongodb')).to eq false
+      expect(compose['services'].include?('mysql')).to eq false
+      expect(compose['services'].include?('postgres')).to eq false
+      expect(compose['services'].include?('redis')).to eq false
+      expect(compose['services'].include?('solr')).to eq false
+      expect(compose['services']['web']['depends_on']).to eq nil
+    end
+
+    it 'will configure a elasticsearch service if passed the --elasticsearch flag' do
+      runner({elasticsearch: true})
+      action("dockerize", '.')
+      compose = YAML.load_file('docker-compose.yml')
+      expect(compose['services'].include?('elasticsearch')).to eq true
+      expect(compose['services']['web']['depends_on'].include?('elasticsearch')).to eq true
+    end
+
+    it 'will configure a fcrepo service if passed the --fcrepo flag' do
+      runner({fcrepo: true})
+      action("dockerize", '.')
+      compose = YAML.load_file('docker-compose.yml')
+      expect(compose['services'].include?('fcrepo')).to eq true
+      expect(compose['services']['web']['depends_on'].include?('fcrepo')).to eq true
+    end
+    
+    it 'will configure a memcached service if passed the --memcached flag' do
+      runner({memcached: true})
+      action("dockerize", '.')
+      compose = YAML.load_file('docker-compose.yml')
+      expect(compose['services'].include?('memcached')).to eq true
+      expect(compose['services']['web']['depends_on'].include?('memcached')).to eq true
+    end
+
+    it 'will configure a mongodb service if passed the --mongodb flag' do
+      runner({mongodb: true})
+      action("dockerize", '.')
+      compose = YAML.load_file('docker-compose.yml')
+      expect(compose['services'].include?('mongodb')).to eq true
+      expect(compose['services']['web']['depends_on'].include?('mongodb')).to eq true
+    end
+
+    it 'will configure a mysql service if passed the --mysql flag' do
+      runner({mysql: true})
+      action("dockerize", '.')
+      compose = YAML.load_file('docker-compose.yml')
+      expect(compose['services'].include?('mysql')).to eq true
+      expect(compose['services']['web']['depends_on'].include?('mysql')).to eq true
+    end
+
+    it 'will configure a postgres service if passed the --postgres flag' do
+      runner({postgres: true})
+      action("dockerize", '.')
+      compose = YAML.load_file('docker-compose.yml')
+      expect(compose['services'].include?('postgres')).to eq true
+      expect(compose['services']['web']['depends_on'].include?('postgres')).to eq true
+    end
+
+    it 'will configure a redis service if passed the --redis flag' do
+      runner({redis: true})
+      action("dockerize", '.')
+      compose = YAML.load_file('docker-compose.yml')
+      expect(compose['services'].include?('redis')).to eq true
+      expect(compose['services']['web']['depends_on'].include?('redis')).to eq true
+    end
+
+    it 'will configure a sidekiq service if passed the --sidekiq flag' do
+      runner({sidekiq: true})
+      action("dockerize", '.')
+      compose = YAML.load_file('docker-compose.yml')
+      expect(compose['services'].include?('worker')).to eq true
+      expect(compose['services']['worker']['command']).to eq 'bundle exec sidekiq'
+      expect(compose['services']['web']['depends_on'].include?('sidekiq')).to eq true
+    end
+    
+    it 'will configure a solr service if passed the --solr flag' do
+      runner({solr: true})
+      action("dockerize", '.')
+      compose = YAML.load_file('docker-compose.yml')
+      expect(compose['services'].include?('solr')).to eq true
+      expect(compose['services']['web']['depends_on'].include?('solr')).to eq true
+    end
+
+    it 'will work from a stack_car dir if it exists' do
+      FileUtils.mkdir_p 'stack_car'
+      action("dockerize")
+      project_root_contents = Dir.entries('..')
+      stack_car_dir_contents = Dir.entries('../stack_car')
+      expect(project_root_contents.include?('docker-compose.yml')).to eq false
+      expect(project_root_contents.include?('Dockerfile')).to eq false
+      expect(stack_car_dir_contents.include?('docker-compose.yml')).to eq true
+      expect(stack_car_dir_contents.include?('Dockerfile')).to eq true
+    end
+  end
+
+  context 'dockerize --helm' do
+
+    before(:each) do
+      # Set up test Rails project directory
+      path = File.join(ROOT_DIR, 'tmp', 'dockerize')
+      FileUtils.rm_rf path
+      FileUtils.mkdir_p path
+      Dir.chdir(path)
+      `git init`
+      `touch Gemfile`
+      `echo '.bundle' > .gitignore`
+    end
+
+    it 'will generate helm templates when passed the helm flag' do
+      runner({helm: true})
+      action("dockerize", '.')
+      expect(Dir.exist?('chart')).to eq true
+    end
+
+    it 'will work from a stack_car dir if it exists' do
+      FileUtils.mkdir_p 'stack_car'
+      runner({helm: true})
+      action("dockerize")
+      project_root_contents = Dir.entries('..')
+      stack_car_dir_contents = Dir.entries('../stack_car')
+      expect(project_root_contents.include?('chart')).to eq false
+      expect(stack_car_dir_contents.include?('chart')).to eq true
+    end
   end
 end
