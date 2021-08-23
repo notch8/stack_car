@@ -137,7 +137,17 @@ env:
     RAILS_ENV: production
     RAILS_LOG_TO_STDOUT: "true"
     RAILS_SERVE_STATIC_FILES: "true"
+    # SMTP Mailer vars
+    # Uncomment vars and SMTP Mailer in config/environments/<environment>.rb to enable
+    # SMTP_USER_NAME: CHANGEME
+    # SMTP_ADDRESS: CHANGEME
+    # SMTP_DOMAIN: CHANGEME
+    # SMTP_PORT: CHANGEME
+    # SMTP_TYPE: CHANGEME
 
   secret:
     SECRET_KEY_BASE: secretabc
     DATABASE_PASSWORD: passwordabc
+    # SMTP Mailer secret
+    # Uncomment vars and SMTP Mailer in config/environments/<environment>.rb to enable
+    # SMTP_PASSWORD: CHANGEME

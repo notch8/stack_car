@@ -266,9 +266,11 @@ module StackCar
        puts template_file
         template("#{template_file}.erb", template_file)
      end
-     template("database.yml.erb", "config/database.yml")
      template(".env.development.erb", ".env.development")
      template(".env.erb", ".env.production")
+     template("database.yml.erb", "config/database.yml")
+     template("development.rb.erb", "config/environments/development.rb")
+     template("production.rb.erb", "config/environments/production.rb")
 
      if File.exists?('README.md')
        prepend_to_file "README.md" do
