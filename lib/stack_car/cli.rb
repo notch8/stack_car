@@ -51,7 +51,7 @@ module StackCar
     def down
       setup
       ensure_development_env
-      
+
       if options[:help]
         run('docker-compose down --help')
         say 'Additional stack_car options:'
@@ -215,7 +215,7 @@ module StackCar
     method_option :helm, default: false, type: :boolean, aliases: '-h'
     method_option :git, default: false, type: :boolean, aliases: '-g'
     method_option :heroku, default: false, type: :boolean, aliases: '-h'
-    method_option :hyku, default: false, type: :boolean, aliases: "\--hu" 
+    method_option :hyku, default: false, type: :boolean, aliases: "\--hu"
     method_option :imagemagick, default: false, type: :boolean, aliases: '-i'
     method_option :memcached, default: false, type: :boolean, aliases: "\--mc"
     method_option :mongodb, default: false, type: :boolean, aliases: "\--mg"
@@ -266,6 +266,7 @@ module StackCar
        puts template_file
         template("#{template_file}.erb", template_file)
      end
+     directory('.gitlab', '.gitlab')
      template(".env.development.erb", ".env.development")
      template(".env.erb", ".env.production")
      template(".sops.yaml.erb", ".sops.yaml")

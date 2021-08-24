@@ -46,6 +46,16 @@ describe StackCar do
       expect(dockerized_project_root_contents.include?('Dockerfile')).to eq true
     end
 
+    it 'generates gitlab issue and merge request templates' do
+      project_root_contents = Dir.entries('.')
+      expect(project_root_contents.include?('.gitlab')).to eq false
+      # expect(project_root_contents.include?('all the files')).to eq false
+      action("dockerize", '.')
+      dockerized_project_root_contents = Dir.entries('.')
+      expect(dockerized_project_root_contents.include?('.gitlab')).to eq true
+      # expect(dockerized_project_root_contents.include?('all the files')).to eq true
+    end
+
     it 'does not configure services additional to Rails unless a flag is passed' do
       action("dockerize", '.')
       compose = YAML.load_file('docker-compose.yml')
@@ -75,7 +85,7 @@ describe StackCar do
       expect(compose['services'].include?('fcrepo')).to eq true
       expect(compose['services']['web']['depends_on'].include?('fcrepo')).to eq true
     end
-    
+
     it 'will configure a memcached service if passed the --memcached flag' do
       runner({memcached: true})
       action("dockerize", '.')
@@ -124,7 +134,7 @@ describe StackCar do
       expect(compose['services']['worker']['command']).to eq 'bundle exec sidekiq'
       expect(compose['services']['web']['depends_on'].include?('sidekiq')).to eq true
     end
-    
+
     it 'will configure a solr service if passed the --solr flag' do
       runner({solr: true})
       action("dockerize", '.')
