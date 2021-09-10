@@ -57,7 +57,10 @@ Developing stack_car often requires a rails application for you to run updated c
 - Commit your changes
 
 ### Releasing a new version
-- Update the version number in `version.rb`
+**NOTE:** You will need an account for [rubygems.org](https://rubygems.org) and be made an owner of the [stack_car gem](https://rubygems.org/gems/stack_car) in order to release a new version.
+
+- Update the version number in `version.rb`. Please follow [Semantic Versioning](https://semver.org/) guidelines.
+- Commit `version.rb` and create an MR. Once the MR is approved and merged, checkout the `main` branch and do a `git pull`.
 - Run `bundle exec rake release`
   - This will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
