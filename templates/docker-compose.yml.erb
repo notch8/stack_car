@@ -129,8 +129,8 @@ services:
     ports:
       - "${WEB_PORT}"
     environment:
-      - VIRTUAL_HOST=<%= @project_name %>.docker
-      - VIRTUAL_PORT=80
+      - VIRTUAL_HOST=.<%= @project_name %>.test
+      - VIRTUAL_PORT=3000
     depends_on:
 <%= compose_depends %>
 

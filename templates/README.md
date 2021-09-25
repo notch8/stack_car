@@ -36,8 +36,11 @@ We recommend committing .env to your repo with good defaults. .env.development, 
 
 6) Load and seed the database
     ``` bash
-    sc be rake db:migrate db: seed
+    sc be rake db:migrate db:seed
     ```
+    
+7) Visit the running instance in the browser at `project-name.test`
+
 ### Troubleshooting Docker Development Setup
 Confirm or configure settings. Sub your information for the examples.
 ``` bash
