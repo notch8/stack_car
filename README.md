@@ -70,6 +70,19 @@ Dockerizing your application with stack_car can be thought of in 2 steps:
 - **Generate the file templates**
 - **Customize provided templates to the requirements of the application**
 
+**Set MERGE tool**
+When using stack_car to dockerize an app, it might be necessary to merge templates as opposed to completely overwriting them. To set a tool run:
+```bash
+export THOR_MERGE=<editor>
+```
+Alternatively, set it in your shell's `rc` file (`~/.bashrc`, `~/.zshrc`, etc.)
+
+With `THOR_MERGE` set, you can enter `m` at the command prompt when there is a conflict between app and `sc` template files.
+
+*Note*: For best experience, set `THOR_MERGE` to **GUI text editor** (ie. `code` or `atom`). 
+
+Initiating a merge pulls 2 versions of the file to the editor. One is what is proposed by stack_car, the other is the original. **Add what you need from the template version to the original file and save the changes**.
+
 ### Generate templates (`sc dockerize`)
 You can generate requisite files for running your application for local development in Docker with the **dockerize** command.
 
