@@ -143,6 +143,14 @@ describe StackCar do
       expect(compose['services']['web']['depends_on'].include?('solr')).to eq true
     end
 
+    it 'will generate solr core initialization scripts if --solr flag' do
+      runner({solr: true})
+      action("dockerize", '.')
+      bin_contents = Dir.entries('./bin')
+      expect(bin_contents.include?('solrcloud-upload-configset.sh')).to eq true
+      expect(bin_contents.include?('solrcloud-assign-configset.sh')).to eq true
+    end
+
     it 'will work from a stack_car dir if it exists' do
       FileUtils.mkdir_p 'stack_car'
       action("dockerize")
