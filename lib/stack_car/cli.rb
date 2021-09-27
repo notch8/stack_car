@@ -240,7 +240,7 @@ module StackCar
       # Commandline overrides config files
       # options = file_config.merge(options)
       # Sets project name to parent directory name if working with stack_car dir
-      @project_name = @sc_dir? File.basename(File.expand_path('..')) : File.basename(File.expand_path(dir))
+      @project_name = @sc_dir ? File.basename(File.expand_path('..')) : File.basename(File.expand_path(dir))
       apt_packages << "libpq-dev postgresql-client" if options[:postgres]
       apt_packages << "mysql-client" if options[:mysql]
       apt_packages << "imagemagick" if options[:imagemagick]
