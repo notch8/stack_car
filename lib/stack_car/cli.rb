@@ -239,7 +239,8 @@ module StackCar
       setup
       # Commandline overrides config files
       # options = file_config.merge(options)
-      @project_name = File.basename(File.expand_path(dir))
+      # Sets project name to parent directory name if working with stack_car dir
+      @project_name = @sc_dir ? File.basename(File.expand_path('..')) : File.basename(File.expand_path(dir))
       apt_packages << "libpq-dev postgresql-client" if options[:postgres]
       apt_packages << "mysql-client" if options[:mysql]
       apt_packages << "imagemagick" if options[:imagemagick]
@@ -276,6 +277,11 @@ module StackCar
      template("development.rb.erb", "config/environments/development.rb")
      template("production.rb.erb", "config/environments/production.rb")
 
+     if options[:solr]
+      template("solrcloud-upload-configset.sh", "bin/solrcloud-upload-configset.sh")
+      template("solrcloud-assign-configset.sh", "bin/solrcloud-assign-configset.sh")
+     end
+      
      if File.exists?('README.md')
        prepend_to_file "README.md" do
          File.read("#{self.class.source_root}/README.md")

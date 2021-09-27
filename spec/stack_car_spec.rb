@@ -143,6 +143,28 @@ describe StackCar do
       expect(compose['services']['web']['depends_on'].include?('solr')).to eq true
     end
 
+    it 'will set development solr vars with sensible defaults' do
+      project_name = 'dockerize'
+      runner({solr: true})
+      action("dockerize", '.')
+      env_vars = Dotenv.parse(".env")
+      expect(env_vars['SOLR_URL']).to eq "http://admin:admin@solr:8983/solr/#{project_name}-development"
+      expect(env_vars['SOLR_ADMIN_PASSWORD']).to eq 'admin'
+      expect(env_vars['SOLR_ADMIN_USER']).to eq 'admin'
+      expect(env_vars['SOLR_COLLECTION_NAME']).to eq "#{project_name}-development"
+      expect(env_vars['SOLR_CONFIGSET_NAME']).to eq project_name
+      expect(env_vars['SOLR_HOST']).to eq 'solr'
+      expect(env_vars['SOLR_PORT']).to eq '8983'
+    end
+
+    it 'will generate solr core initialization scripts if --solr flag' do
+      runner({solr: true})
+      action("dockerize", '.')
+      bin_contents = Dir.entries('./bin')
+      expect(bin_contents.include?('solrcloud-upload-configset.sh')).to eq true
+      expect(bin_contents.include?('solrcloud-assign-configset.sh')).to eq true
+    end
+
     it 'will work from a stack_car dir if it exists' do
       FileUtils.mkdir_p 'stack_car'
       action("dockerize")
