@@ -276,6 +276,11 @@ module StackCar
      template("development.rb.erb", "config/environments/development.rb")
      template("production.rb.erb", "config/environments/production.rb")
 
+     if options[:solr]
+      template("solrcloud-upload-configset.sh", "bin/solrcloud-upload-configset.sh")
+      template("solrcloud-assign-configset.sh", "bin/solrcloud-assign-configset.sh")
+     end
+      
      if File.exists?('README.md')
        prepend_to_file "README.md" do
          File.read("#{self.class.source_root}/README.md")
