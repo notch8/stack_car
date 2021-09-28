@@ -206,4 +206,80 @@ describe StackCar do
       expect(stack_car_dir_contents.include?('chart')).to eq true
     end
   end
+
+  context 'dockerize --helm --hyku' do
+
+    before(:each) do
+      # Set up test Rails project directory
+      path = File.join(ROOT_DIR, 'tmp', 'dockerize')
+      FileUtils.rm_rf path
+      FileUtils.mkdir_p path
+      Dir.chdir(path)
+      `git init`
+      `touch Gemfile`
+      `echo '.bundle' > .gitignore`
+    end
+
+    it 'will generate hyku script if hyku flag is passed' do
+      runner({helm: true, hyku: true})
+      action("dockerize", '.')
+      bin_contents = Dir.entries('./bin')
+      expect(bin_contents.include?('helm_deploy')).to eq true
+      expect(bin_contents.include?('helm_delete')).to eq true
+    end
+
+    it 'will not generate chart if hyku flag is passed' do
+      runner({helm: true, hyku: true})
+      action("dockerize", '.')
+      expect(Dir.exist?('chart')).to eq false
+    end
+
+    it 'adds a sample values files for hyku deploys' do
+      runner({helm: true, hyku: true})
+      action("dockerize", '.')
+      bin_contents = Dir.entries('./ops')
+      expect(bin_contents.include?('sample-deploy.tmpl.yaml')).to eq true
+      # TODO Expect multitenancy examples
+      helm_values = YAML.load_file('ops/sample-deploy.tmpl.yaml')['extraEnvVars'].map { |v|  v["name"] }
+      expect(helm_values.include?('SETTINGS__MULTITENANCY__ADMIN_HOST')).to eq true
+      expect(helm_values.include?('SETTINGS__MULTITENANCY__DEFAULT_HOST')).to eq true
+      expect(helm_values.include?('SETTINGS__MULTITENANCY__ROOT_HOST')).to eq true
+      expect(helm_values.include?('SETTINGS__MULTITENANCY__ENABLED')).to eq true
+    end
+  end
+
+  context 'dockerize --helm --hyrax' do
+
+    before(:each) do
+      # Set up test Rails project directory
+      path = File.join(ROOT_DIR, 'tmp', 'dockerize')
+      FileUtils.rm_rf path
+      FileUtils.mkdir_p path
+      Dir.chdir(path)
+      `git init`
+      `touch Gemfile`
+      `echo '.bundle' > .gitignore`
+    end
+
+    it 'will generate hyrax deploy script if hyrax flag is passed' do
+      runner({helm: true, hyrax: true})
+      action("dockerize", '.')
+      bin_contents = Dir.entries('./bin')
+      expect(bin_contents.include?('helm_deploy')).to eq true
+      expect(bin_contents.include?('helm_delete')).to eq true
+    end
+
+    it 'will not generate chart if hyku flag is passed' do
+      runner({helm: true, hyrax: true})
+      action("dockerize", '.')
+      expect(Dir.exist?('chart')).to eq false
+    end
+
+    it 'adds a sample values files for hyrax deploys' do
+      runner({helm: true, hyrax: true})
+      action("dockerize", '.')
+      bin_contents = Dir.entries('./ops')
+      expect(bin_contents.include?('sample-deploy.tmpl.yaml')).to eq true
+    end
+  end
 end
