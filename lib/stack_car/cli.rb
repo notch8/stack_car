@@ -280,6 +280,7 @@ module StackCar
      if options[:hyku] || options[:hyrax]
       template("helm_deploy", "bin/helm_deploy")
       template("helm_delete", "bin/helm_delete")
+      template("sample-deploy.tmpl.yaml.tt", "ops/sample-deploy.tmpl.yaml")
      end
      
      if options[:solr]
