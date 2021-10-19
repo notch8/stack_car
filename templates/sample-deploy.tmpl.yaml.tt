@@ -14,44 +14,44 @@ uploadsVolume:
 
 extraVolumeMounts:
   - name: uploads
-    mountPath: /app/samvera/hyrax-webapp/tmp/imports
+    mountPath: /app/samvera/<%= @project_type %>-webapp/tmp/imports
     subPath: imports
   - name: uploads
-    mountPath: /app/samvera/hyrax-webapp/tmp/exports
+    mountPath: /app/samvera/<%= @project_type %>-webapp/tmp/exports
     subPath: exports
   - name: uploads
-    mountPath: /app/samvera/hyrax-webapp/public/system
+    mountPath: /app/samvera/<%= @project_type %>-webapp/public/system
     subPath: public-system
   - name: uploads
-    mountPath: /app/samvera/hyrax-webapp/public/uploads
+    mountPath: /app/samvera/<%= @project_type %>-webapp/public/uploads
     subPath: public-uploads
   - name: uploads
-    mountPath: /app/samvera/hyrax-webapp/tmp/network_files
+    mountPath: /app/samvera/<%= @project_type %>-webapp/tmp/network_files
     subPath: network-files
 
 ingress:
   enabled: true
   hosts:
-    - host: <%= @project_name %>-hyrax-staging.notch8.cloud
+    - host: <%= @project_name %>-<%= @project_type %>-staging.notch8.cloud
       paths:
         - path: /
-    - host: "*.<%= @project_name %>-hyrax-staging.notch8.cloud"
+    - host: "*.<%= @project_name %>-<%= @project_type %>-staging.notch8.cloud"
       paths:
         - path: /
 
 extraEnvVars:
 <% if options[:hyku] -%>
   - name: SETTINGS__MULTITENANCY__ADMIN_HOST
-    value: <%= @project_name %>-hyrax-staging.notch8.cloud
+    value: <%= @project_name %>-<%= @project_type %>-staging.notch8.cloud
   - name: SETTINGS__MULTITENANCY__ROOT_HOST
-    value: <%= @project_name %>-hyrax-staging.notch8.cloud
+    value: <%= @project_name %>-<%= @project_type %>-staging.notch8.cloud
   - name: SETTINGS__MULTITENANCY__DEFAULT_HOST
-    value: "%{tenant}.<%= @project_name %>-hyrax-staging.notch8.cloud"
+    value: "%{tenant}.<%= @project_name %>-<%= @project_type %>-staging.notch8.cloud"
   - name: SETTINGS__MULTITENANCY__ADMIN_ONLY_TENANT_CREATION
     value: "false"
 <% end -%>
   - name: CONFDIR
-    value: "/app/samvera/hyrax-webapp/solr/config"
+    value: "/app/samvera/<%= @project_type %>-webapp/solr/config"
   - name: INITIAL_ADMIN_EMAIL
     value: CHANGEME
   - name: INITIAL_ADMIN_PASSWORD
@@ -73,9 +73,9 @@ extraEnvVars:
   - name: MYSQL_HOST
     value: <%= @project_name %>-staging-mariadb
   - name: MYSQL_DATABASE
-    value: <%= @project_name %>-hyrax
+    value: <%= @project_name %>-<%= @project_type %>
   - name: MYSQL_USER
-    value: <%= @project_name %>-hyrax
+    value: <%= @project_name %>-<%= @project_type %>
 <% end %>
   - name: FCREPO_BASE_PATH
     value: /<%= @project_name %>
@@ -121,35 +121,35 @@ extraEnvVars:
     value: /app/fits/fits.sh
 <% if options[:hyku] -%>
   - name: SETTINGS__MULTITENANCY__ADMIN_HOST
-    value: <%= @project_name %>-hyrax-staging.notch8.cloud
+    value: <%= @project_name %>-<%= @project_type %>-staging.notch8.cloud
   - name: SETTINGS__MULTITENANCY__ADMIN_ONLY_TENANT_CREATION
     value: "true"
   - name: SETTINGS__MULTITENANCY__DEFAULT_HOST
-    value: "%{tenant}.<%= @project_name %>-hyrax-staging.notch8.cloud"
+    value: "%{tenant}.<%= @project_name %>-<%= @project_type %>-staging.notch8.cloud"
   - name: SETTINGS__MULTITENANCY__ENABLED
     value: "true"
 <% end -%>
   - name: SETTINGS__SOLR__COLLECTION_OPTIONS__COLLECTION__CONFIG_NAME
-    value: <%= @project_name %>-hyrax-staging
+    value: <%= @project_name %>-<%= @project_type %>-staging
   - name: SETTINGS__SOLR__CONFIGSET
-    value: <%= @project_name %>-hyrax-staging
+    value: <%= @project_name %>-<%= @project_type %>-staging
   - name: SETTINGS__SOLR__URL
-    value: <CHANGEME>/<%= @project_name %>-hyrax-staging
+    value: <CHANGEME>/<%= @project_name %>-<%= @project_type %>-staging
   - name: SETTINGS__ZOOKEEPER__CONNECTION_STR
     value: solr-zookeeper-headless.default:2181/configs
   - name: SOLR_ADMIN_USER
     value: admin
   - name: SOLR_COLLECTION_NAME
-    value: <%= @project_name %>-hyrax-staging
+    value: <%= @project_name %>-<%= @project_type %>-staging
   - name: SOLR_CONFIGSET_NAME
-    value: <%= @project_name %>-hyrax-staging
+    value: <%= @project_name %>-<%= @project_type %>-staging
   - name: SOLR_HOST
     # For use in staging, CHANGE for production deploys
     value: solr.staging-solr.svc.cluster.local
   - name: SOLR_PORT
     value: "8983"
   - name: SOLR_URL
-    value: <CHANGEME>/<%= @project_name %>-hyrax-staging
+    value: <CHANGEME>/<%= @project_name %>-<%= @project_type %>-staging
 
 worker:
   replicaCount: 1
@@ -160,33 +160,33 @@ worker:
     fsGroupChangePolicy: "OnRootMismatch"
   extraVolumeMounts:
     - name: uploads
-      mountPath: /app/samvera/hyrax-webapp/tmp/imports
+      mountPath: /app/samvera/<%= @project_type %>-webapp/tmp/imports
       subPath: imports
     - name: uploads
-      mountPath: /app/samvera/hyrax-webapp/tmp/exports
+      mountPath: /app/samvera/<%= @project_type %>-webapp/tmp/exports
       subPath: exports
     - name: uploads
-      mountPath: /app/samvera/hyrax-webapp/public/system
+      mountPath: /app/samvera/<%= @project_type %>-webapp/public/system
       subPath: public-system
     - name: uploads
-      mountPath: /app/samvera/hyrax-webapp/public/uploads
+      mountPath: /app/samvera/<%= @project_type %>-webapp/public/uploads
       subPath: public-uploads
     - name: uploads
-      mountPath: /app/samvera/hyrax-webapp/tmp/network_files
+      mountPath: /app/samvera/<%= @project_type %>-webapp/tmp/network_files
       subPath: network-files
   extraEnvVars:
 <% if options[:hyku] -%>
   - name: SETTINGS__MULTITENANCY__ADMIN_HOST
-    value: <%= @project_name %>-hyrax-staging.notch8.cloud
+    value: <%= @project_name %>-<%= @project_type %>-staging.notch8.cloud
   - name: SETTINGS__MULTITENANCY__ROOT_HOST
-    value: <%= @project_name %>-hyrax-staging.notch8.cloud
+    value: <%= @project_name %>-<%= @project_type %>-staging.notch8.cloud
   - name: SETTINGS__MULTITENANCY__DEFAULT_HOST
-    value: "%{tenant}.<%= @project_name %>-hyrax-staging.notch8.cloud"
+    value: "%{tenant}.<%= @project_name %>-<%= @project_type %>-staging.notch8.cloud"
   - name: SETTINGS__MULTITENANCY__ADMIN_ONLY_TENANT_CREATION
     value: "false"
 <% end -%>
   - name: CONFDIR
-    value: "/app/samvera/hyrax-webapp/solr/config"
+    value: "/app/samvera/<%= @project_type %>-webapp/solr/config"
   - name: INITIAL_ADMIN_EMAIL
     value: CHANGEME
   - name: INITIAL_ADMIN_PASSWORD
@@ -208,9 +208,9 @@ worker:
   - name: MYSQL_HOST
     value: <%= @project_name %>-staging-mariadb
   - name: MYSQL_DATABASE
-    value: <%= @project_name %>-hyrax
+    value: <%= @project_name %>-<%= @project_type %>
   - name: MYSQL_USER
-    value: <%= @project_name %>-hyrax
+    value: <%= @project_name %>-<%= @project_type %>
 <% end -%>
   - name: FCREPO_BASE_PATH
     value: /<%= @project_name %>
@@ -256,34 +256,34 @@ worker:
     value: /app/fits/fits.sh
 <% if options[:hyku] -%>
   - name: SETTINGS__MULTITENANCY__ADMIN_HOST
-    value: <%= @project_name %>-hyrax-staging.notch8.cloud
+    value: <%= @project_name %>-<%= @project_type %>-staging.notch8.cloud
   - name: SETTINGS__MULTITENANCY__ADMIN_ONLY_TENANT_CREATION
     value: "true"
   - name: SETTINGS__MULTITENANCY__DEFAULT_HOST
-    value: "%{tenant}.<%= @project_name %>-hyrax-staging.notch8.cloud"
+    value: "%{tenant}.<%= @project_name %>-<%= @project_type %>-staging.notch8.cloud"
   - name: SETTINGS__MULTITENANCY__ENABLED
     value: "true"
 <% end -%>
   - name: SETTINGS__SOLR__COLLECTION_OPTIONS__COLLECTION__CONFIG_NAME
-    value: <%= @project_name %>-hyrax-staging
+    value: <%= @project_name %>-<%= @project_type %>-staging
   - name: SETTINGS__SOLR__CONFIGSET
-    value: <%= @project_name %>-hyrax-staging
+    value: <%= @project_name %>-<%= @project_type %>-staging
   - name: SETTINGS__SOLR__URL
-    value: <CHANGEME>/<%= @project_name %>-hyrax-staging
+    value: <CHANGEME>/<%= @project_name %>-<%= @project_type %>-staging
   - name: SETTINGS__ZOOKEEPER__CONNECTION_STR
     value: solr-zookeeper-headless.default:2181/configs
   - name: SOLR_ADMIN_USER
     value: admin
   - name: SOLR_COLLECTION_NAME
-    value: <%= @project_name %>-hyrax-staging
+    value: <%= @project_name %>-<%= @project_type %>-staging
   - name: SOLR_CONFIGSET_NAME
-    value: <%= @project_name %>-hyrax-staging
+    value: <%= @project_name %>-<%= @project_type %>-staging
   - name: SOLR_HOST
     value: solr.staging-solr
   - name: SOLR_PORT
     value: "8983"
   - name: SOLR_URL
-    value: <CHANGEME>/<%= @project_name %>-hyrax-staging
+    value: <CHANGEME>/<%= @project_name %>-<%= @project_type %>-staging
   # - name: SENTRY_DSN
   #   value: $SENTRY_DSN
 
@@ -310,8 +310,8 @@ mariadb:
   replication:
     enabled: false
   db:
-    name: <%= @project_name %>-hyrax
-    user: <%= @project_name %>-hyrax
+    name: <%= @project_name %>-<%= @project_type %>
+    user: <%= @project_name %>-<%= @project_type %>
     password: CHANGEME
   rootUser:
     password: CHANGEME
@@ -346,4 +346,4 @@ solrExistingSecret: solr-admin-password
 # For use in staging, CHANGE for production deploys
 externalSolrHost: solr.staging-solr.svc.cluster.local
 externalSolrUser: admin
-externalSolrCollection: "<%= @project_name %>-hyrax-staging"
+externalSolrCollection: "<%= @project_name %>-<%= @project_type %>-staging"

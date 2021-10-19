@@ -282,4 +282,22 @@ describe StackCar do
       expect(bin_contents.include?('sample-deploy.tmpl.yaml')).to eq true
     end
   end
+
+  context 'set_project_type' do
+
+    it 'sets project type to hyku if hyku option is passed' do
+      runner({hyku: true})
+      expect(runner.send(:set_project_type)).to eq('hyku')
+    end
+
+    it 'sets project type to hyku if hyrax option is passed' do
+      runner({hyrax: true})
+      expect(runner.send(:set_project_type)).to eq('hyrax')
+    end
+
+    it 'defaults project to rails type' do
+      runner()
+      expect(runner.send(:set_project_type)).to eq('rails')
+    end
+  end
 end

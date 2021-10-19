@@ -216,6 +216,7 @@ module StackCar
     method_option :git, default: false, type: :boolean, aliases: '-g'
     method_option :heroku, default: false, type: :boolean, aliases: '-h'
     method_option :hyku, default: false, type: :boolean, aliases: "\--hu"
+    method_option :hyrax, default: false, type: :boolean, aliases: "\--hx"
     method_option :imagemagick, default: false, type: :boolean, aliases: '-i'
     method_option :memcached, default: false, type: :boolean, aliases: "\--mc"
     method_option :mongodb, default: false, type: :boolean, aliases: "\--mg"
@@ -410,7 +411,18 @@ module StackCar
       "dotenv -f .env.#{environment},.env"
     end
 
+    def set_project_type
+      if options[:hyku]
+        @project_type = 'hyku'
+      elsif options[:hyrax]
+        @project_type = 'hyrax'
+      else
+        @project_type = 'rails'
+      end
+    end
+
     def setup
+      set_project_type
       if File.exists?('stack_car')
         @sc_dir = true
         Dir.chdir('stack_car')
