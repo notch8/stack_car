@@ -220,7 +220,7 @@ describe StackCar do
       `echo '.bundle' > .gitignore`
     end
 
-    it 'will generate hyku script if hyku flag is passed' do
+    it 'will generate hyku scripts if hyku flag is passed' do
       runner({helm: true, hyku: true})
       action("dockerize", '.')
       bin_contents = Dir.entries('./bin')
@@ -261,7 +261,7 @@ describe StackCar do
       `echo '.bundle' > .gitignore`
     end
 
-    it 'will generate hyrax deploy script if hyrax flag is passed' do
+    it 'will generate hyrax deploy scripts if hyrax flag is passed' do
       runner({helm: true, hyrax: true})
       action("dockerize", '.')
       bin_contents = Dir.entries('./bin')

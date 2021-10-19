@@ -277,6 +277,11 @@ module StackCar
      template("development.rb.erb", "config/environments/development.rb")
      template("production.rb.erb", "config/environments/production.rb")
 
+     if options[:hyku] || options[:hyrax]
+      template("helm_deploy", "bin/helm_deploy")
+      template("helm_delete", "bin/helm_deploy")
+     end
+     
      if options[:solr]
       template("solrcloud-upload-configset.sh", "bin/solrcloud-upload-configset.sh")
       template("solrcloud-assign-configset.sh", "bin/solrcloud-assign-configset.sh")
