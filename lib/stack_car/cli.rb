@@ -279,7 +279,7 @@ module StackCar
 
      if options[:hyku] || options[:hyrax]
       template("helm_deploy", "bin/helm_deploy")
-      template("helm_delete", "bin/helm_deploy")
+      template("helm_delete", "bin/helm_delete")
      end
      
      if options[:solr]
@@ -315,12 +315,14 @@ module StackCar
 
         say 'Please update ops/hosts with the correct server addresses'
       elsif options[:helm]
-        directory('chart')
-        if options[:fcrepo]
-          directory('chart-fcrepo', 'chart/templates')
-        end
-        if options[:sidekiq]
-          directory('chart-sidekiq', 'chart/templates')
+        unless options[:hyku] || options[:hyrax]
+          directory('chart')
+          if options[:fcrepo]
+            directory('chart-fcrepo', 'chart/templates')
+          end
+          if options[:sidekiq]
+            directory('chart-sidekiq', 'chart/templates')
+          end
         end
      else
         empty_directory('ops')

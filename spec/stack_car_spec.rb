@@ -219,7 +219,7 @@ describe StackCar do
       `touch Gemfile`
       `echo '.bundle' > .gitignore`
     end
-
+    
     it 'will generate hyku scripts if hyku flag is passed' do
       runner({helm: true, hyku: true})
       action("dockerize", '.')
