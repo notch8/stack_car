@@ -51,7 +51,7 @@ services:
       - docker-entrypoint.sh
       - solr-precreate
       - mycore
-    # docker-compose exec --user=solr solr bin/solr create_core -c CORENAME
+    # docker compose exec --user=solr solr bin/solr create_core -c CORENAME
 <% end -%>
 <% if options[:redis] -%>
   redis:

@@ -26,14 +26,14 @@ Commands are accesible via the "sc" short cut. Note: this will need to be in you
 
 ```ruby
 Commands:
-  stack_car bundle_exec ARGS  # wraps docker-compose exec web bundle exec unless --service is used to specify (sc be ARGS)
+  stack_car bundle_exec ARGS  # wraps docker compose exec web bundle exec unless --service is used to specify (sc be ARGS)
   stack_car console ARGS      # shortcut to start rails console
   stack_car dockerize DIR     # Will copy the docker tempates in to your project, see options for supported dependencies
-  stack_car exec ARGS         # wraps docker-compose exec web unless --service is used to specify
+  stack_car exec ARGS         # wraps docker compose exec web unless --service is used to specify
   stack_car help [COMMAND]    # Describe available commands or one specific command
-  stack_car stop              # starts docker-compose with rebuild and orphan removal, defaults to all
-  stack_car up                # starts docker-compose with rebuild and orphan removal, defaults to web
-  stack_car walk ARGS         # wraps docker-compose run web unless --service is used to specify
+  stack_car stop              # starts docker compose with rebuild and orphan removal, defaults to all
+  stack_car up                # starts docker compose with rebuild and orphan removal, defaults to web
+  stack_car walk ARGS         # wraps docker compose run web unless --service is used to specify
 ```
 
 ## Development
