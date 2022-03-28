@@ -18,17 +18,17 @@ module StackCar
     method_option :service, default: 'web', type: :string, aliases: '-s'
     method_option :build, default: false, type: :boolean, aliases: '-b'
     method_option :logs, default: true, type: :boolean
-    desc "up", "starts docker-compose with rebuild and orphan removal, defaults to web"
+    desc "up", "starts docker compose with rebuild and orphan removal, defaults to web"
     def up
       setup
       ensure_development_env
       args = ['--remove-orphans']
       args << '--build' if options[:build]
       if options[:build]
-        run("#{dotenv} docker-compose pull #{options[:service]}")
+        run("#{dotenv} docker compose pull #{options[:service]}")
       end
 
-      run_with_exit("#{dotenv} docker-compose up #{args.join(' ')} #{options[:service]}")
+      run_with_exit("#{dotenv} docker compose up #{args.join(' ')} #{options[:service]}")
     end
 
     method_option :service, default: '', type: :string, aliases: '-s'
@@ -36,7 +36,7 @@ module StackCar
     def stop
       setup
       ensure_development_env
-      run("#{dotenv} docker-compose stop #{options[:service]}")
+      run("#{dotenv} docker compose stop #{options[:service]}")
       run_with_exit("rm -rf tmp/pids/*")
     end
 
@@ -53,7 +53,7 @@ module StackCar
       ensure_development_env
 
       if options[:help]
-        run('docker-compose down --help')
+        run('docker compose down --help')
         say 'Additional stack_car options:'
         say '    -a, --all               Removes all containers, networks, volumes, and'
         say '                            images created by `up`.'
@@ -85,7 +85,7 @@ module StackCar
         args << '--timeout' if options[:timeout]
       end
 
-      run("#{dotenv} docker-compose down #{args.join(' ')}")
+      run("#{dotenv} docker compose down #{args.join(' ')}")
       run_with_exit('rm -rf tmp/pids/*')
     end
 
@@ -94,65 +94,65 @@ module StackCar
     def build
       setup
       ensure_development_env
-      run_with_exit("#{dotenv} docker-compose build #{options[:service]}")
+      run_with_exit("#{dotenv} docker compose build #{options[:service]}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
-    desc "push ARGS", "wraps docker-compose push web unless --service is used to specify"
+    desc "push ARGS", "wraps docker compose push web unless --service is used to specify"
     def push(*args)
       setup
-      run_with_exit("#{dotenv} docker-compose push #{options[:service]} #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker compose push #{options[:service]} #{args.join(' ')}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
-    desc "pull ARGS", "wraps docker-compose pull web unless --service is used to specify"
+    desc "pull ARGS", "wraps docker compose pull web unless --service is used to specify"
     def pull(*args)
       setup
-      run_with_exit("#{dotenv} docker-compose pull #{options[:service]} #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker compose pull #{options[:service]} #{args.join(' ')}")
     end
 
     method_option :service, default: '', type: :string, aliases: '-s'
-    desc "ps ARGS", "wraps docker-compose pull web unless --service is used to specify"
+    desc "ps ARGS", "wraps docker compose pull web unless --service is used to specify"
     def ps(*args)
       setup
-      run_with_exit("#{dotenv} docker-compose ps #{options[:service]} #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker compose ps #{options[:service]} #{args.join(' ')}")
     end
     map status: :ps
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
-    desc "bundle ARGS", "wraps docker-compose run web unless --service is used to specify"
+    desc "bundle ARGS", "wraps docker compose run web unless --service is used to specify"
     def bundle(*args)
       setup
-      run_with_exit("#{dotenv} docker-compose exec #{options[:service]} bundle")
+      run_with_exit("#{dotenv} docker compose exec #{options[:service]} bundle")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
-    desc "walk ARGS", "wraps docker-compose run web unless --service is used to specify"
+    desc "walk ARGS", "wraps docker compose run web unless --service is used to specify"
     def walk(*args)
       setup
-      run_with_exit("#{dotenv} docker-compose run #{options[:service]} #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker compose run #{options[:service]} #{args.join(' ')}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
-    desc "exec ARGS", "wraps docker-compose exec web unless --service is used to specify"
+    desc "exec ARGS", "wraps docker compose exec web unless --service is used to specify"
     def exec(*args)
       setup
-      run_with_exit("#{dotenv} docker-compose exec #{options[:service]} #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker compose exec #{options[:service]} #{args.join(' ')}")
     end
     map ex: :exec
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
-    desc 'sh ARGS', "launch a shell using docker-compose exec, sets tty properly"
+    desc 'sh ARGS', "launch a shell using docker compose exec, sets tty properly"
     def sh(*args)
       setup
-      run_with_exit("#{dotenv} docker-compose exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput lines\`\" #{options[:service]} bash #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker compose exec -e COLUMNS=\"\`tput cols\`\" -e LINES=\"\`tput lines\`\" #{options[:service]} bash #{args.join(' ')}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
-    desc "bundle_exec ARGS", "wraps docker-compose exec web bundle exec unless --service is used to specify"
+    desc "bundle_exec ARGS", "wraps docker compose exec web bundle exec unless --service is used to specify"
     def bundle_exec(*args)
       setup
-      run_with_exit("#{dotenv} docker-compose exec #{options[:service]} bundle exec #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker compose exec #{options[:service]} bundle exec #{args.join(' ')}")
     end
     map be: :bundle_exec
 
@@ -160,7 +160,7 @@ module StackCar
     desc "console ARGS", "shortcut to start rails console"
     def console(*args)
       setup
-      run_with_exit("#{dotenv} docker-compose exec #{options[:service]} bundle exec rails console #{args.join(' ')}")
+      run_with_exit("#{dotenv} docker compose exec #{options[:service]} bundle exec rails console #{args.join(' ')}")
     end
     map rc: :console
 
@@ -437,11 +437,11 @@ module StackCar
     end
 
     def find_container_by_service(service_name)
-      container_id = `docker-compose ps -aq #{service_name}`.strip
+      container_id = `docker compose ps -aq #{service_name}`.strip
 
       if container_id.empty?
         say "Unable to locate a container for the service '#{service_name}'"
-        say "Try running `docker-compose ps #{service_name}` to make sure the container exists"
+        say "Try running `docker compose ps #{service_name}` to make sure the container exists"
         exit(1)
       end
 

@@ -29,7 +29,7 @@
     - debug: var=authout
 
     - name: Restart service
-      command: "cd {{ compose_dir }} && docker-compose -f {{ project_name }}.yml pull web && docker-compose -f {{ project_name }}.yml up -d web"
+      command: "cd {{ compose_dir }} && docker compose -f {{ project_name }}.yml pull web && docker compose -f {{ project_name }}.yml up -d web"
       environment:
         TAG: "{{ tag }}"
       register: output
