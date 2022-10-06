@@ -1,0 +1,40 @@
+[
+ {
+  "Description": "Generic API Key",
+  "StartLine": 14,
+  "EndLine": 15,
+  "StartColumn": 6,
+  "EndColumn": 1,
+  "Match": "key_sig: 58118E89F3A912897C070ADBF76221572C52609D",
+  "Secret": "58118E89F3A912897C070ADBF76221572C52609D",
+  "File": "templates/ops/roles/docker.ubuntu/defaults/main.yml",
+  "Commit": "43411f1589addb6ec3cf4038ad7954ba4708cddb",
+  "Entropy": 3.7439427,
+  "Author": "Rob Kaufman",
+  "Email": "rob@notch8.com",
+  "Date": "2017-03-14T05:37:28Z",
+  "Message": "add ubuntu / debian docker role",
+  "Tags": [],
+  "RuleID": "generic-api-key",
+  "Fingerprint": "43411f1589addb6ec3cf4038ad7954ba4708cddb:templates/ops/roles/docker.ubuntu/defaults/main.yml:generic-api-key:14"
+ },
+ {
+  "Description": "Generic API Key",
+  "StartLine": 68,
+  "EndLine": 69,
+  "StartColumn": 6,
+  "EndColumn": 1,
+  "Match": "key_sig: 58118E89F3A912897C070ADBF76221572C52609D",
+  "Secret": "58118E89F3A912897C070ADBF76221572C52609D",
+  "File": "templates/ops/roles/docker.ubuntu/README.md",
+  "Commit": "43411f1589addb6ec3cf4038ad7954ba4708cddb",
+  "Entropy": 3.7439427,
+  "Author": "Rob Kaufman",
+  "Email": "rob@notch8.com",
+  "Date": "2017-03-14T05:37:28Z",
+  "Message": "add ubuntu / debian docker role",
+  "Tags": [],
+  "RuleID": "generic-api-key",
+  "Fingerprint": "43411f1589addb6ec3cf4038ad7954ba4708cddb:templates/ops/roles/docker.ubuntu/README.md:generic-api-key:68"
+ }
+]
