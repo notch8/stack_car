@@ -2,11 +2,23 @@ name: Test
 on: [ push, pull_request]
 jobs: 
   rspec:
-    name: CI
+    strategy:
+      matrix:
+      ruby: ['2.6', '2.7']
+    name: Run rspec with ruby ${{matrix.ruby}}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+    - name: Cache
+      uses: actions/cache@v2.1.3
+      with:
+        path: vendor/bundle
+        key: ${{ matrix.ruby }}
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1.59.1
+      with:
+        ruby-version: ${{ matrix.ruby }}
     - name: Dependencies
       run: |
         bundle config path vendor/bundle
