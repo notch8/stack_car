@@ -4,7 +4,7 @@ jobs:
   rspec:
     strategy:
       matrix:
-      ruby: ['2.6', '2.7']
+        ruby: ['2.6', '2.7']
     name: Run rspec with ruby ${{matrix.ruby}}
     runs-on: ubuntu-latest
     steps:
