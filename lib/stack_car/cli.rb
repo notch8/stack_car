@@ -1,6 +1,6 @@
 require 'thor'
 require 'erb'
-require 'dotenv/load'
+require 'dotenv'
 require 'json'
 require 'byebug'
 module StackCar
@@ -166,6 +166,7 @@ module StackCar
 
     desc "release ENVIRONTMENT", "tag and push and image to the registry"
     def release(environment)
+      Dotenv.load(".env.#{environment}", '.env')
       setup
       timestamp = Time.now.strftime("%Y%m%d%I%M%S")
       sha = `git rev-parse HEAD`[0..8]
@@ -193,6 +194,7 @@ module StackCar
 
     desc "ssh ENVIRONMENT", "log in to a running instance - requires PRODUCTION_SSH to be set"
     def ssh(environment)
+      Dotenv.load(".env.#{environment}", '.env')
       setup
       target = ENV["#{environment.upcase}_SSH"]
       if target
@@ -281,7 +283,7 @@ module StackCar
       template("solrcloud-upload-configset.sh", "bin/solrcloud-upload-configset.sh")
       template("solrcloud-assign-configset.sh", "bin/solrcloud-assign-configset.sh")
      end
-      
+
      if File.exists?('README.md')
        prepend_to_file "README.md" do
          File.read("#{self.class.source_root}/README.md")
