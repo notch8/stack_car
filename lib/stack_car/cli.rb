@@ -1,6 +1,6 @@
 require 'thor'
 require 'erb'
-require 'dotenv/load'
+require 'dotenv'
 require 'json'
 require 'byebug'
 module StackCar
@@ -166,12 +166,13 @@ module StackCar
 
     desc "release ENVIRONTMENT", "tag and push and image to the registry"
     def release(environment)
+      Dotenv.load(".env.#{environment}", '.env')
       setup
       timestamp = Time.now.strftime("%Y%m%d%I%M%S")
       sha = `git rev-parse HEAD`[0..8]
       registry = "#{ENV['REGISTRY_HOST']}#{ENV['REGISTRY_URI']}"
       tag = ENV["TAG"] || 'latest'
-      unless File.exists?("#{ENV['HOME']}/.docker/config.json") && File.readlines("#{ENV['HOME']}/.docker/config.json").grep(/#{ENV['REGISTRY_HOST']}/).size > 0
+      unless File.exist?("#{ENV['HOME']}/.docker/config.json") && File.readlines("#{ENV['HOME']}/.docker/config.json").grep(/#{ENV['REGISTRY_HOST']}/).size > 0
         run_with_exit("#{dotenv(environment)} docker login #{ENV['REGISTRY_HOST']}")
       end
       run_with_exit("#{dotenv(environment)} docker tag #{registry}:#{tag} #{registry}:#{environment}-#{timestamp}")
@@ -193,6 +194,7 @@ module StackCar
 
     desc "ssh ENVIRONMENT", "log in to a running instance - requires PRODUCTION_SSH to be set"
     def ssh(environment)
+      Dotenv.load(".env.#{environment}", '.env')
       setup
       target = ENV["#{environment.upcase}_SSH"]
       if target
@@ -281,8 +283,8 @@ module StackCar
       template("solrcloud-upload-configset.sh", "bin/solrcloud-upload-configset.sh")
       template("solrcloud-assign-configset.sh", "bin/solrcloud-assign-configset.sh")
      end
-      
-     if File.exists?('README.md')
+
+     if File.exist?('README.md')
        prepend_to_file "README.md" do
          File.read("#{self.class.source_root}/README.md")
        end
@@ -383,7 +385,7 @@ module StackCar
 
     def find_config(dir)
       path = File.join(dir, '.stackcar_rc')
-      if File.exists?(path)
+      if File.exist?(path)
         return path
       elsif dir == "/"
         return nil
@@ -393,7 +395,7 @@ module StackCar
     end
 
     def ensure_development_env
-      if !File.exists?('.env.development')
+      if !File.exist?('.env.development')
         template(".env.development.erb", ".env.development")
       end
     end
@@ -403,7 +405,7 @@ module StackCar
     end
 
     def setup
-      if File.exists?('stack_car')
+      if File.exist?('stack_car')
         @sc_dir = true
         Dir.chdir('stack_car')
         self.destination_root += "/stack_car"
