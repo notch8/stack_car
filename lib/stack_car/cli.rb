@@ -2,7 +2,7 @@ require 'thor'
 require 'erb'
 require 'dotenv'
 require 'json'
-require 'byebug'
+
 module StackCar
   class HammerOfTheGods < Thor
     include Thor::Actions
