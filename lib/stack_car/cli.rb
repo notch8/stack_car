@@ -18,11 +18,11 @@ module StackCar
     method_option :service, default: 'web', type: :string, aliases: '-s'
     method_option :build, default: false, type: :boolean, aliases: '-b'
     method_option :logs, default: true, type: :boolean
-    desc "up", "starts docker compose with rebuild and orphan removal, defaults to web"
+    desc "up", "starts docker compose with rebuild, defaults to web"
     def up
       setup
       ensure_development_env
-      args = ['--remove-orphans']
+      args = []
       args << '--build' if options[:build]
       if options[:build]
         run("#{dotenv} docker compose pull #{options[:service]}")
@@ -42,7 +42,6 @@ module StackCar
 
     method_option :volumes, aliases: '-v'
     method_option :rmi
-    method_option :'remove-orphans'
     method_option :service, aliases: '-s'
     method_option :timeout, aliases: '-t'
     method_option :all, aliases: '-a'
@@ -75,13 +74,12 @@ module StackCar
 
       args = []
       if options[:all]
-        prompt_run_confirmation('--all will remove all containers, volumes, networks, local images, and orphaned containers. Continue?')
+        prompt_run_confirmation('--all will remove all containers, volumes, networks, and local images. Continue?')
 
-        args = %w[--volumes --rmi=local --remove-orphans]
+        args = %w[--volumes --rmi=local]
       else
         args << '--volumes' if options[:volumes]
         args << '--rmi=local' if options[:rmi]
-        args << '--remove-orphans' if options[:'remove-orphans']
         args << '--timeout' if options[:timeout]
       end
 
