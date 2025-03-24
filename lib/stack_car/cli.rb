@@ -12,6 +12,10 @@ module StackCar
       File.join(File.dirname(__FILE__), '..', '..', 'templates')
     end
 
+    def self.gem_root
+      File.join(File.dirname(__FILE__), '..', '..')
+    end
+
     def self.exit_on_failure?
       true
     end
