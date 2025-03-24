@@ -42,5 +42,6 @@ module StackCar
         say("you must run proxy cert once after installing this gem before using the proxy")
         exit(1)
       end
+    end
   end
 end
