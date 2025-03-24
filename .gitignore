@@ -9,3 +9,5 @@
 /tmp/
 **/.#*
 /public/*
+/proxy/localhost*
+.tool-versions

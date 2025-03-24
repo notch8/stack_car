@@ -1,0 +1,59 @@
+services:
+  traefik:
+    image: "traefik"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "3333:3333"
+    volumes:
+      - "${DOCKER_SOCKET}:/var/run/docker.sock:ro"
+      - ./traefik.yml:/etc/traefik/traefik.yml
+      - ./localhost.direct.SS.crt:/etc/traefik/cert.pem
+      - ./localhost.direct.SS.key:/etc/traefik/key.pem
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.router.rule=Host(`traefik.localhost.direct`)
+      - traefik.http.routers.router.entrypoints=websecure
+      - traefik.http.services.router.loadbalancer.server.port=8080
+      - traefik.http.routers.router.tls=true
+    healthcheck:
+      test: ["CMD-SHELL", "traefik healthcheck --ping"]
+      interval: 4s
+      timeout: 4s
+      retries: 8
+      start_period: 4s
+
+  whoami:
+    image: traefik/whoami
+    ports:
+      - "80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.tls=true"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost.direct`)"
+      - "traefik.http.services.whoami.loadbalancer.server.port=80"
+
+  # dnsmasq:
+  #   image: joweisberg/dnsmasq
+  #   restart: always
+  #   ports:
+  #     - ${DNSMASQ_PORT}:53
+  #     - 5380:8080
+  #   environment:
+  #     HTTP_USER: ${DNSMASQ_USER}
+  #     HTTP_PASS: ${DNSMASQ_PASSWORD}
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.dnsmasq.rule=Host(`dnsmasq.${DOMAIN}`)"
+  #     - "traefik.http.services.dnsmasq.loadbalancer.server.port=8080"
+  #     - "traefik.http.routers.dnsmasq.entrypoints=web"
+  #   volumes:
+  #     - ./dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf
+  #     - ./dnsmasq/dnsmasq.d/:/etc/dnsmasq.d
+networks:
+  default:
+    name: network.direct
+    ipam:
+      config:
+        - subnet: 172.100.61.0/24

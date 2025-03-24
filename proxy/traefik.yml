@@ -1,0 +1,49 @@
+---
+global:
+  sendAnonymousUsage: false
+
+providers:
+  docker:
+    exposedByDefault: false
+    endpoint: "unix:///var/run/docker.sock"
+  file:
+    directory: /etc/traefik
+    watch: true
+
+api:
+  insecure: true
+  dashboard: true
+
+serversTransport:
+  insecureSkipVerify: true
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+
+  websecure:
+    address: ":443"
+
+  tcp:
+    address: ":3333"
+
+tls:
+  certificates:
+    - certFile: /etc/traefik/cert.pem
+      keyFile: /etc/traefik/key.pem
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /etc/traefik/cert.pem
+        keyFile: /etc/traefik/key.pem
+
+ping:
+  entryPoint: "web"
+
+log:
+  level: DEBUG
