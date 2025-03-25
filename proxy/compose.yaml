@@ -53,7 +53,4 @@ services:
   #     - ./dnsmasq/dnsmasq.d/:/etc/dnsmasq.d
 networks:
   default:
-    name: network.direct
-    ipam:
-      config:
-        - subnet: 172.100.61.0/24
+    name: stackcar
