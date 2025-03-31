@@ -1,6 +1,8 @@
-require "stack_car/version"
-require "stack_car/cli"
-require "stack_car/dot_rc"
+require_relative './stack_car/version'
+require_relative './stack_car/os'
+require_relative './stack_car/proxy'
+require_relative './stack_car/cli'
+require_relative './stack_car/dot_rc'
 
 ##
 # Ruby 3.x removed {File.exists?} in favor of {File.exist?}.  This shim ensures that we can run

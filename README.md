@@ -17,28 +17,76 @@ Stack Car is an opinionated set of tools around Docker and Rails.  It provides c
 Because stack_car will be used to run your application in side of Docker, you want to install stack car in to your system Ruby instead of putting in your applications Gemfile
 
 ```bash
-gem install stack_car 
+gem install stack_car
 ```
 
 ## Usage
 
-Commands are accesible via the "sc" short cut. Note: this will need to be in your command path in front of the spreadsheet command (sc), which is a fairly archaiac unix spreadsheet tool. We're guessing you don't edit a lot of spreadsheets in your terminal, but if you do, we also figure you can override your path order pretty easily.  Many of these commands have short versions or alias to make remembering them easier.  If there are obvious aliases missing, PRs are welcome.
+Commands are accessible via the "sc" short cut. Note: this will need to be in your command path in front of the spreadsheet command (sc), which is a fairly archaiac unix spreadsheet tool. We're guessing you don't edit a lot of spreadsheets in your terminal, but if you do, we also figure you can override your path order pretty easily.  Many of these commands have short versions or alias to make remembering them easier.  If there are obvious aliases missing, PRs are welcome.
 
 ```ruby
 Commands:
   stack_car bundle_exec ARGS  # wraps docker compose exec web bundle exec unless --service is used to specify (sc be ARGS)
   stack_car console ARGS      # shortcut to start rails console
-  stack_car dockerize DIR     # Will copy the docker tempates in to your project, see options for supported dependencies
+  stack_car dockerize DIR     # Will copy the docker templates in to your project, see options for supported dependencies
   stack_car exec ARGS         # wraps docker compose exec web unless --service is used to specify
   stack_car help [COMMAND]    # Describe available commands or one specific command
   stack_car stop              # starts docker compose with rebuild and orphan removal, defaults to all
   stack_car up                # starts docker compose with rebuild and orphan removal, defaults to web
   stack_car walk ARGS         # wraps docker compose run web unless --service is used to specify
+  stack_car proxy up          # starts proxy container for SSL termination
+  stack_car proxy down        # stops running proxy container
+  stack_car proxy cert        # generates SSL certificates for local development, uses *.localhost.direct
 ```
+
+## Proxy
+StackCar has a built-in proxy designed to simplify local SSL development. The proxy provides SSL termination for your web services, allowing you to run your applications with HTTPS locally.
+
+### Getting Started with the Proxy
+
+To use the StackCar proxy:
+1. **Download and Install the SSL certificates** for local development:
+   ```bash
+   sc proxy cert
+   ```
+   This will download the SSL certificates for `*.localhost.direct`. This only needs to be done once per version of stack_car.
+
+2. **Start the proxy**:
+   ```bash
+   sc proxy up
+   ```
+
+3. If you application is running in Docker, make sure you application has labels:
+   ```yaml
+   labels:
+     - "traefik.enable=true"
+     - "traefik.http.routers.my-app.tls=true"
+     - "traefik.http.routers.my-app.entrypoints=websecure"
+     - "traefik.http.routers.my-app.rule=HostRegexp(`my-app.localhost.direct`)"
+     - "traefik.http.services.my-app.loadbalancer.server.port=3000"
+   ```
+
+4. **Access your application** using `https://my-app.localhost.direct`
+
+### Proxy Configuration
+
+The proxy configuration can be customized in your `docker-compose.yml` file. By default, it's configured to handle SSL termination on port 443 and forward traffic to your application services.
+
+### Stopping the Proxy
+
+When you're done working with SSL, you can stop the proxy:
+```bash
+sc proxy down
+```
+
+### Troubleshooting
+
+- **Certificate issues**: If your browser doesn't trust the certificate, you may need to add the generated certificate to your system's trust store.
+- **Port conflicts**: Ensure port 443 is available on your local machine.
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can run `bin/test_sc` to run the command but from your local check out. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
 **To install this gem onto your local machine**
 - Run `bundle exec rake install`
@@ -79,7 +127,7 @@ Alternatively, set it in your shell's `rc` file (`~/.bashrc`, `~/.zshrc`, etc.)
 
 With `THOR_MERGE` set, you can enter `m` at the command prompt when there is a conflict between app and `sc` template files.
 
-*Note*: For best experience, set `THOR_MERGE` to **GUI text editor** (ie. `code` or `atom`). 
+*Note*: For best experience, set `THOR_MERGE` to **GUI text editor** (ie. `code` or `atom`).
 
 Initiating a merge pulls 2 versions of the file to the editor. One is what is proposed by stack_car, the other is the original. **Add what you need from the template version to the original file and save the changes**.
 
@@ -107,7 +155,7 @@ stack_car will have provided sensible defaults for your services but customizati
 - Do a text search to find and replace any instances `CHANGEME` in the generated files
 - Add any **general environment variables** to `.env`
   - This sets defaults for all docker compose environments
-- Add any **development environment variables** to `.env.development` 
+- Add any **development environment variables** to `.env.development`
   - These set up any new values or overrides specific to your development env
 - Run `sc build` to build your image
   - On failed build, browse the terminal output to track down and squash any misconfigurations. Rebuild

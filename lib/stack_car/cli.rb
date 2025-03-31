@@ -2,6 +2,7 @@ require 'thor'
 require 'erb'
 require 'dotenv'
 require 'json'
+require 'byebug' if ENV['STACK_CAR_DEBUG']
 
 module StackCar
   class HammerOfTheGods < Thor
@@ -11,9 +12,16 @@ module StackCar
       File.join(File.dirname(__FILE__), '..', '..', 'templates')
     end
 
+    def self.gem_root
+      File.join(File.dirname(__FILE__), '..', '..')
+    end
+
     def self.exit_on_failure?
       true
     end
+
+    desc 'proxy COMMAND', 'Manage the traefik proxy for local development'
+    subcommand 'proxy', Proxy
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     method_option :build, default: false, type: :boolean, aliases: '-b'
@@ -330,6 +338,7 @@ module StackCar
     end
 
     protected
+
     def compose_depends(*excludes)
       @compose_depends = []
       services = [:fcrepo, :postgres, :mysql, :elasticsearch, :sidekiq, :solr, :redis, :mongodb, :memcached] - excludes
@@ -370,6 +379,7 @@ module StackCar
       if !result
         exit(1)
       end
+      result
     end
 
     def file_config

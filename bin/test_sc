@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+ENV['STACK_CAR_DEBUG'] = 'true'
+load "#{File.dirname(__FILE__)}/../lib/stack_car.rb"
+
+StackCar::HammerOfTheGods.start(ARGV)
