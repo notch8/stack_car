@@ -21,6 +21,16 @@ module StackCar
       self.bash('uname -a | grep "Darwin" > /dev/null')
     end
 
+    def self.wsl?
+      self.bash(self.wsl_cmd)
+    end
+
+    def self.wsl_cmd
+      %q(
+        grep -i "microsoft\|wsl" /proc/version > /dev/null 2>&1
+      )
+    end
+
     def self.ubuntu_cmd
       %q(
         if $(which lsb_release >/dev/null 2>&1); then
