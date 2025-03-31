@@ -39,9 +39,54 @@ Commands:
   stack_car proxy cert        # generates SSL certificates for local development, uses *.localhost.direct
 ```
 
+## Proxy
+StackCar has a built-in proxy designed to simplify local SSL development. The proxy provides SSL termination for your web services, allowing you to run your applications with HTTPS locally.
+
+### Getting Started with the Proxy
+
+To use the StackCar proxy:
+1. **Download and Install the SSL certificates** for local development:
+   ```bash
+   sc proxy cert
+   ```
+   This will download the SSL certificates for `*.localhost.direct`. This only needs to be done once per version of stack_car.
+
+2. **Start the proxy**:
+   ```bash
+   sc proxy up
+   ```
+
+3. If you application is running in Docker, make sure you application has labels:
+   ```yaml
+   labels:
+     - "traefik.enable=true"
+     - "traefik.http.routers.my-app.tls=true"
+     - "traefik.http.routers.my-app.entrypoints=websecure"
+     - "traefik.http.routers.my-app.rule=HostRegexp(`my-app.localhost.direct`)"
+     - "traefik.http.services.my-app.loadbalancer.server.port=3000"
+   ```
+
+4. **Access your application** using `https://my-app.localhost.direct`
+
+### Proxy Configuration
+
+The proxy configuration can be customized in your `docker-compose.yml` file. By default, it's configured to handle SSL termination on port 443 and forward traffic to your application services.
+
+### Stopping the Proxy
+
+When you're done working with SSL, you can stop the proxy:
+```bash
+sc proxy down
+```
+
+### Troubleshooting
+
+- **Certificate issues**: If your browser doesn't trust the certificate, you may need to add the generated certificate to your system's trust store.
+- **Port conflicts**: Ensure port 443 is available on your local machine.
+
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can run `bin/test_sc` to run the command but from your local check out. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
 **To install this gem onto your local machine**
 - Run `bundle exec rake install`
