@@ -25,6 +25,7 @@ module StackCar
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     method_option :build, default: false, type: :boolean, aliases: '-b'
+    method_option :detach, default: false, type: :boolean, aliases: '-d'
     method_option :logs, default: true, type: :boolean
     desc "up", "starts docker compose with rebuild, defaults to web"
     def up
@@ -32,6 +33,7 @@ module StackCar
       ensure_development_env
       args = []
       args << '--build' if options[:build]
+      args << '--detach' if options[:detach]
       if options[:build]
         run("#{dotenv} docker compose pull #{options[:service]}")
       end
@@ -124,6 +126,13 @@ module StackCar
       run_with_exit("#{dotenv} docker compose ps #{options[:service]} #{args.join(' ')}")
     end
     map status: :ps
+
+    method_option :service, default: 'web', type: :string, aliases: '-s'
+    desc "config", "outputs the docker compose config"
+    def up
+      setup
+      run_with_exit("#{dotenv} docker compose up #{args.join(' ')} #{options[:service]}")
+    end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "bundle ARGS", "wraps docker compose run web unless --service is used to specify"
