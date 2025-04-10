@@ -427,7 +427,7 @@ module StackCar
 
       DotRc.new
       ENV['APP_NAME'] ||= File.basename(ENV['PWD']).gsub('_', '-')
-      ENV['BASE_TAG'] ||= %x{cd hyrax-webapp && git rev-parse --short=8 HEAD} if File.exists?('hyrax-webapp')
+      ENV['BASE_TAG'] ||= %x{cd hyrax-webapp && git rev-parse --short=8 HEAD}.strip if File.exists?('hyrax-webapp')
     end
 
     def remove_container(service_name, remove_volumes)
