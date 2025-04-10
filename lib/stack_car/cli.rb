@@ -30,7 +30,6 @@ module StackCar
     desc "up", "starts docker compose with rebuild, defaults to web"
     def up
       setup
-      ensure_development_env
       args = []
       args << '--build' if options[:build]
       args << '--detach' if options[:detach]
@@ -45,7 +44,6 @@ module StackCar
     desc "stop", "stops the specified running service, defaults to all"
     def stop
       setup
-      ensure_development_env
       run("#{dotenv} docker compose stop #{options[:service]}")
       run_with_exit("rm -rf tmp/pids/*")
     end
@@ -59,7 +57,6 @@ module StackCar
     desc 'down', 'stops and removes containers and networks specific to this project by default, run with -h for more options'
     def down
       setup
-      ensure_development_env
 
       if options[:help]
         run('docker compose down --help')
@@ -101,7 +98,6 @@ module StackCar
     desc "build", "builds specified service, defaults to web"
     def build
       setup
-      ensure_development_env
       run_with_exit("#{dotenv} docker compose build #{options[:service]}")
     end
 
@@ -129,9 +125,9 @@ module StackCar
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "config", "outputs the docker compose config"
-    def up
+    def config
       setup
-      run_with_exit("#{dotenv} docker compose up #{args.join(' ')} #{options[:service]}")
+      run_with_exit("#{dotenv} docker compose config #{args.join(' ')} #{options[:service]}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
@@ -427,7 +423,11 @@ module StackCar
         Dir.chdir('stack_car')
         self.destination_root += "/stack_car"
       end
+      ensure_development_env
+
       DotRc.new
+      ENV['APP_NAME'] ||= File.basename(ENV['PWD']).gsub('_', '-')
+      ENV['BASE_TAG'] ||= %x{cd hyrax-webapp && git rev-parse --short=8 HEAD} if File.exists?('hyrax-webapp')
     end
 
     def remove_container(service_name, remove_volumes)
