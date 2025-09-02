@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["rob@notch8.com"]
 
   spec.summary       = %q{A tool to make rails + docker easy}
-  spec.homepage      = "https://gitlab.com/notch8/stack_car"
+  spec.homepage      = "https://github.com/notch8/stack_car"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|spec|features)/})
