@@ -28,5 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "archive-zip"
   spec.add_runtime_dependency "dotenv"
   spec.add_runtime_dependency "json", "~> 2.3"
-  spec.add_runtime_dependency "thor", "~> 0.20"
+  spec.add_runtime_dependency "thor", "~> 1.4"
 end
