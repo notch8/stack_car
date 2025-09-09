@@ -21,7 +21,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1.59.1
         with:
-          ruby-version: "2.3"
+          ruby-version: "3.2"
       - name: Dependencies
         run: |
           bundle config path vendor/bundle
