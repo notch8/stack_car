@@ -19,7 +19,7 @@ jobs:
           path: vendor/bundle
           key: "2.3"
       - name: Setup Ruby
-        uses: ruby/setup-ruby@v1.59.1
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.2"
       - name: Dependencies
