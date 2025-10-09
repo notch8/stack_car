@@ -8,8 +8,8 @@ services:
     volumes:
       - "${DOCKER_SOCKET}:/var/run/docker.sock:ro"
       - ./traefik.yml:/etc/traefik/traefik.yml
-      - ./localhost.direct.SS.crt:/etc/traefik/cert.pem
-      - ./localhost.direct.SS.key:/etc/traefik/key.pem
+      - ${HOME}/.config/stack_car/localhost.direct.SS.crt:/etc/traefik/cert.pem
+      - ${HOME}/.config/stack_car/localhost.direct.SS.key:/etc/traefik/key.pem
     labels:
       - traefik.enable=true
       - traefik.http.routers.router.rule=Host(`traefik.localhost.direct`)
