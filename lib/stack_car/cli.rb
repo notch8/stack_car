@@ -96,9 +96,9 @@ module StackCar
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
     desc "build", "builds specified service, defaults to web"
-    def build
+    def build(*args)
       setup
-      run_with_exit("#{dotenv} docker compose build #{options[:service]}")
+      run_with_exit("#{dotenv} docker compose build #{options[:service]} #{args.join(' ')}")
     end
 
     method_option :service, default: 'web', type: :string, aliases: '-s'
