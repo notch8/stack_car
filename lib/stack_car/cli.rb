@@ -27,8 +27,8 @@ module StackCar
     method_option :build, default: false, type: :boolean, aliases: '-b'
     method_option :detach, default: false, type: :boolean, aliases: '-d'
     method_option :logs, default: true, type: :boolean
-    method_option :scale, type: :hash, default: {}, aliases: '-n',
-                  desc: "Scale services (e.g., -n web=2 worker=4 solr=3)"
+    method_option :scale, type: :array, default: [], aliases: '-n',
+                  desc: "Scale services (e.g., -n worker=3 -n sidekiq=2)"
     desc "up", "starts docker compose with rebuild, defaults to web"
     def up
       setup
@@ -37,18 +37,9 @@ module StackCar
       args << '--detach' if options[:detach]
 
       # Add scale options
-      if options[:scale].any?
-        options[:scale].each do |service_name, count|
-          args << "--scale #{service_name}=#{count}"
-        end
+      options[:scale].each do |scale_arg|
+        args << "--scale #{scale_arg}"
       end
-
-      if options[:build]
-        run("#{dotenv} docker compose pull #{options[:service]}")
-      end
-
-      run_with_exit("#{dotenv} docker compose up #{args.join(' ')} #{options[:service]}")
-    end
 
       if options[:build]
         run("#{dotenv} docker compose pull #{options[:service]}")
