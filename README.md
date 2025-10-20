@@ -39,6 +39,105 @@ Commands:
   stack_car proxy cert        # generates SSL certificates for local development, uses *.localhost.direct
 ```
 
+## Scaling Services
+
+StackCar supports scaling services using Docker Compose's scale functionality. This is useful for running multiple instances of a service, such as workers or background job processors.
+
+**To scale services**
+- Use the `-n` (number) flag with the `up` command
+- Specify service name and replica count (e.g., `-n worker=3`)
+
+```bash
+# Scale a single service
+sc up -n worker=3 -d
+
+# Scale multiple services
+sc up -n worker=3 sidekiq=2 -d
+
+# Combine with other flags
+sc up -b -d -n worker=5
+
+# Long form also works
+sc up --scale worker=3 -d
+```
+
+### Common Use Cases
+
+**Scaling background workers**
+
+For applications with heavy background job processing:
+```bash
+# Start with 5 worker instances
+sc up -n worker=5 -d
+
+# Scale up during peak hours
+sc up -n worker=10 -d
+
+# Scale down during off-peak
+sc up -n worker=2 -d
+```
+
+**Multiple service types**
+
+For applications with different worker types:
+```bash
+# Scale different worker types independently
+sc up -n default_worker=3 priority_worker=5 mailer_worker=2 -d
+```
+
+**Development testing**
+
+Test load balancing and concurrent processing locally:
+```bash
+# Spin up multiple instances to test race conditions
+sc up -n web=3 worker=2 -d
+```
+
+### Docker Compose Configuration
+
+For services you plan to scale, avoid hardcoded port mappings in `docker-compose.yml`:
+
+**Bad (will cause port conflicts):**
+```yaml
+worker:
+  ports:
+    - "3001:3000"  # This will fail when scaling
+```
+
+**Good (allows multiple instances):**
+```yaml
+worker:
+  # No port mapping, or use a range
+  expose:
+    - 3000
+```
+
+### Troubleshooting
+
+**Port binding errors**
+- Remove hardcoded port mappings from services you want to scale
+- Use `expose` instead of `ports` in docker-compose.yml
+
+**Services not scaling**
+- Verify the service name matches what's in docker-compose.yml
+- Check that Docker Compose is up to date
+
+**Logs from scaled services**
+```bash
+# View logs from all instances of a service
+docker compose logs worker
+
+# Follow logs in real-time
+docker compose logs -f worker
+```
+
+**Tips**:
+- The `-n` flag accepts a hash of service names and replica counts
+- Services must be defined in your `docker-compose.yml` file
+- Scaled services should be stateless for best results
+- Use `-d` (detach) flag to run services in the background
+- Scaling works best with services that don't bind to specific ports (or use port ranges)
+
 ## Proxy
 StackCar has a built-in proxy designed to simplify local SSL development. The proxy provides SSL termination for your web services, allowing you to run your applications with HTTPS locally.
 
